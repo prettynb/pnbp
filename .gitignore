@@ -1,0 +1,6 @@
+*.sublime-*
+.DS_Store
+__pycache__/
+*egg-info/**
+
+settings.json

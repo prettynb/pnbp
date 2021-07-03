@@ -1,0 +1,9 @@
+{
+    "NOTE_PATH": "/users/alice/notebook",
+    "IMG_PATH": "/users/alice/notebook/imgs",
+    "HTML_PATH": "/users/alice/blogtest",
+    "VENV_PATH": "/users/alice/.envs/venv/",
+    "API_BASE": "http://127.0.0.1:8000",
+    "API_TOKEN": "fakeinitialvalue",
+    "PUB_LNK_ONLY": false
+}

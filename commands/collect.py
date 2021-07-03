@@ -1,0 +1,209 @@
+import os
+import re
+import inspect
+import subprocess
+
+from pnbp.wrappers import pass_nb, arrow_call
+
+from .tasks import _collect_tasks_note 		# NOTE: all imported to and locally defined collect.py
+from .graph import _collect_public_graph 	# "_collect" fxns are called in _nb_collect_all (nb-collect-all)
+from .subl import _collect_subl_projs 		# and made avail individually (e.g. collect-tasks-note) automatically
+
+
+
+""" commands writing collections to specific notebook files:
+"""
+@pass_nb
+def _collect_all_stats(nb=None):
+	""" ... stats (incl [[links]] to nb-collect-all "all *" entries)
+	"""
+	num_notes = len(nb)
+	cont = f'\nnum_notes = {num_notes}'
+
+	num_chars = sum([len(n.md) for n in nb.notes.values()])
+	cont += f'\nnum_chars = {num_chars}'
+
+	cont += '\n\nall "all \_\_\_\_" notes:'
+	for n in nb.notes.values():
+		if n.name.startswith('all '):
+			cont += f"\n[[{n.name}]]"
+
+	nb.generate_note('all stats', cont, overwrite=True)
+
+
+@pass_nb
+def _collect_all_notes(nb=None):
+	""" all .md files linked 
+		-> nb/all notes.md
+	"""
+	nb.generate_note(
+		'all notes',
+		"".join([f"[[{n.name}]]\n" for n in nb.notes.values()]),
+		overwrite=True
+		)
+
+
+@pass_nb
+def _collect_all_urls(nb=None):
+	""" all regex-ed http-based urls -> nb/all urls.md
+	"""
+	all_urls = []
+	for n in nb.notes.values():
+		if n.name not in ('all urls'):
+			for u in n.urls:
+				all_urls.append(u)
+
+	nb.generate_note(
+		'all urls', 
+		'\n'.join(str(l) for l in all_urls), 
+		overwrite=True
+		)
+
+
+@pass_nb
+def _collect_all_public(nb=None):
+	""" if note contains #public -> notebook/all public.md
+	"""
+	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_tagged(nb.COMMIT_TAG)])
+	ns = "#public posts:\n\n --- \n\n " + ns
+
+	nb.generate_note('all public', ns, overwrite=True)
+
+
+@pass_nb
+def _touch_all_public(nb=None):
+	""" update the mod date for all #public """
+	_collect_all_public(nb)
+
+	for f in nb.notes['all public'].links:
+		subprocess.run(['touch', os.path.join(nb.NOTE_PATH, f+'.md')])
+
+
+@pass_nb
+def _collect_terms(nb=None):
+	""" if found [[TERMS]] -> nb/TERMS.md
+	"""
+	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_linked('TERMS')])
+	ns = "all [[TERMS]] :\n\n --- \n\n " + ns
+
+	nb.generate_note('TERMS', ns, overwrite=True)
+
+
+@pass_nb
+def _collect_all_unlinked(nb=None):
+	""" if not a single [[]] found 
+		-> nb/all unlinked.md
+	"""
+	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if not n.links])
+	ns = "all unlinked :\n\n --- \n\n " + ns
+
+	nb.generate_note('all unlinked', ns, overwrite=True)
+
+
+@pass_nb
+def _collect_all_empty(nb=None):
+	""" if a note is created on path w/out context 
+		-> nb/all empty.md
+	"""
+	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if len(n.md) < 4])
+	ns = "all empty :\n\n --- \n\n " + ns
+
+	nb.generate_note('all empty', ns, overwrite=True)
+
+
+@pass_nb
+def _delete_all_empty(nb=None):
+	""" delete all empty notes from nb/all empty.md
+	"""
+	_collect_all_empty(nb) # refresh
+
+	for l in nb.notes['all empty'].links:
+		lfn = l + '.md'
+		if os.path.exists(os.path.join(nb.NOTE_PATH, lfn)):
+			print(f'removing: {lfn} (empty)')
+			os.remove(os.path.join(nb.NOTE_PATH, lfn))
+
+
+@pass_nb
+def _collect_all_unheadered(nb=None):
+	""" if not "Links: ..." at the first line, 
+		-> nb/all unheadered.md
+	"""
+	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if not n.header])
+	ns = "all unheadered :\n\n --- \n\n " + ns
+
+	nb.generate_note('all unheadered', ns, overwrite=True)
+
+
+@pass_nb
+def _collect_all_moc(nb=None):
+	""" "maps of content" via capitalization (e.g. [[PYTHON]]) 
+		-> nb/all MOC.md
+	"""
+	ns = "".join([f"[[{n.name}]]\n" for fn, n in nb.notes.items() if fn.isupper()])
+	ns = "all MOC :\n\n --- \n\n " + ns
+
+	nb.generate_note('all MOC', ns, overwrite=True)
+
+
+@pass_nb
+def _collect_all_tags(nb=None):
+	""" a fancy generated note showing #tag per [[]] (and [[]] per #tag)
+		-> nb/all tags.md
+	"""
+	ns = []
+	
+	ns.append(', '.join([t for t in nb.tags]))
+	
+	ns.append('\n--- ')
+
+	for t in nb.tags:
+		t_w = f'{t} - '
+		for n in nb.get_tagged(t):
+			if not n.name == 'all tags':
+				t_w += f' [[{n.name}]], '
+
+		ns.append(t_w.rstrip(', '))
+
+	ns.append('\n--- ')
+
+	for n in nb.notes.values():
+		if not n.name == 'all tags':
+			fn_w = f'[[{n.name}]] - '
+
+			if n.tags:
+				for t in n.tags:
+					fn_w += f' #{t}, '
+
+				ns.append(fn_w.rstrip(', '))
+	
+	nb.generate_note(
+		'all tags', 
+		'\n'.join(str(ft) for ft in ns),
+		overwrite=True
+		)
+
+
+
+
+
+"""
+"""
+@arrow_call
+@pass_nb
+def _nb_collect_all(nb=None):
+	""" perform all collect- commands in succession
+	"""
+	for k, func in globals().items():
+		if k.startswith('_collect') and inspect.isfunction(func):
+			print(f'{func.__name__} -->')
+			func(nb) #call each function with the nb instance passed 
+
+
+
+
+
+
+
+
+
