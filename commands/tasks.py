@@ -28,11 +28,16 @@ TASK_VARS = r'\((.+)\)'
 COMPL_TAG = '#complete'
 
 
-@pass_nb
-def record_complete_tasks(c_tasks:list=[], nb=None):
-	""" 
-	:param list c_tasks: e.g. ['- [x] clean room', '- [x] laundry', '- [x] some fake task']
+# @pass_nb
+def record_complete_tasks(c_tasks:list=[], nb: Notebook=None):
+	""" called by other tasks fnxs (not a command)
+		initialize nb/_complete.md -> 
+		record c_tasks at YYYY-MM-DD section 
+	:param list c_tasks: complete tasks e.g. ['- [x] clean room', '- [x] laundry', '- [x] some fake task']
 	"""
+	if not nb.get('_complete'):
+		nb.generate_note('_complete', "")
+
 	if c_tasks:
 		fin_item_str = '\n'.join(c_tasks)
 

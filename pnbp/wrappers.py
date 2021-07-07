@@ -18,7 +18,7 @@ def pass_nb(func):
 	def inner(*args, **kwargs):
 		
 		if not 'nb' in inspect.signature(func).parameters.keys(): # why being wrapped?
-			raise TypeError(f"@pass_nb decorator expecting keyword argument 'nb' on func '{func.__name__}'")
+			raise TypeError(f"@pass_nb decorator expecting keyword argument 'nb' in func '{func.__name__}' def parameters")
 
 		args = list(args) # convert from tuple to manip
 

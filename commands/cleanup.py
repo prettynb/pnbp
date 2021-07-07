@@ -8,7 +8,7 @@ from pnbp.helpers import str_strip_link, add_link_mention
 """
 """
 @pass_nb
-def _fix_link_spacing(nb=None):
+def _fix_link_spacing(note:Note, nb=None):
 	""" [[ LINK ]] -> [[LINK]]
 	"""
 	p = re.compile(nb.MDS_INT_LNK)
@@ -48,31 +48,12 @@ def _link_unlinked_mentions(note:Note, nb=None):
 	"""
 	n = note
 
-	pb = {}
-	ns = n.md
-	# pull out all code, links, tags, urls, 
-	# so that they don't get matched with 
-	for i, cb in enumerate(n.cblocks):
-		_repl = f'cb_{i}.'
-		ns = ns.replace(cb, _repl)
-		pb.update({_repl: cb})
-	for i, l in enumerate(n.links):
-		_repl = f'l_{i}.'
-		ns = ns.replace(f'[[{l}]]', _repl)
-		pb.update({_repl: f'[[{l}]]'})
-	for i, t in enumerate(n.tags):
-		_repl = f't_{i}.'
-		ns = ns.replace(t, _repl)
-		pb.update({_repl: t})
-	for i, u in enumerate(n.urls):
-		_repl = f'u_{i}.'
-		ns = ns.replace(u, _repl)
-		pb.update({_repl: u})	
-
+	n.prime_md_out_protect()
+	ns = n.md_out
 	nnames = sorted(nb.notes.keys(), reverse=True)
 	
 	# replace the unlinked mentions
-	# within the md text body:
+	# within the .md text body:
 	print(n.name, ':')
 	for name in nnames:
 		p = re.compile(fr'([^\[]\b)({name})(\b[^\]])')
@@ -81,27 +62,81 @@ def _link_unlinked_mentions(note:Note, nb=None):
 				print(m[1], f'--> [[{m[1]}]]')
 		ns = p.sub(add_link_mention, ns)
 
-	for k,v in pb.items():
-		# put code, links, tags, urls, back in:
-		ns = ns.replace(k, v)
-
-	# save the note:
 	n.md_out = ns
-	n.save(nb)
+	n.prime_md_out_release(nb) # saved in-line
+
+
+@pass_nb
+def _collect_unlinked_mentions(nb=None):
+	""" ... -> nb/all unlinked mentions.md 
+	""" # takes a long time ...
+	nnames = sorted(nb.notes.keys(), reverse=True)
+	ns = "\n\n---\n\n"
+	for n in nb.notes.values():
+		n.prime_md_out_protect()
+		_md = n.md_out
+		
+		print(f'\n[[{n.name}]] :\n\t --> ')
+		ns += f'\n[[{n.name}]] :'
+		for name in nnames:
+			p = re.compile(fr'([^\[]\b)({name})(\b[^\]])')
+			if (ml := p.findall(_md)):
+				ns += '\n\t --> '
+				for m in ml:
+					print(f'\[\[{m[1]}\]\], ')
+					ns += f'\[\[{m[1]}\]\], '
+		ns += '\n'
+		n.md_out = ''
+		n.pprotect = {}
+		# ^^ not saving, just looking
+
+	nb.generate_note('all unlinked mentions', ns, overwrite=True)
+
+
 
 
 @pass_nb
 def _remove_nonexistant_links(note=Note, nb=None):
 	""" [[An Old Note]] link -> An Old Note link
 	"""
+	n = note
+
 	remv = []
-	for name in note.links:
+	for name in n.links:
 		if not nb.get(name):
 			remv.append(name)
 
-	note.remove_links(remv)
-	print(note.md_out)
-	note.save(nb)
+	n.remove_links(remv)
+	print(n.md_out)
+	n.save(nb)
+
+
+@pass_nb
+def _collect_nonexistant_links(nb=None):
+	""" ... -> nb/all nonexistant links.mb
+	"""
+	ns = "\n\n---\n\n"
+
+	for n in nb.notes.values():
+		_oldl = []
+		for name in n.links:
+			if not nb.get(name):
+				print(f'\[\[{name}\]\]')
+				_oldl.append(f'\[\[{name}\]\]')
+
+		if _oldl:
+			print(f'\n[[{n.name}]] :\n --> ')
+			ns += f'\n[[{n.name}]] :\n --> '
+			for ol in _oldl:
+				ns += f'{ol}, '
+			ns += '\n'
+
+	nb.generate_note('all nonexistant links', ns, overwrite=True)
+
+
+
+
+
 
 
 

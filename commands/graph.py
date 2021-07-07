@@ -1,6 +1,6 @@
 from string import ascii_uppercase
 
-from pnbp.models import Notebook
+from pnbp.models import Notebook, Note
 from pnbp.wrappers import pass_nb
 
 import click 
@@ -21,8 +21,10 @@ import click
 		AA --> A
 	```
 """
+
 @pass_nb
-def _create_tag_graph(tag='', nb=None):
+@click.option('--tag', help="The name of the #tag to be graphed. (#tag or tag)")
+def _create_tag_graph(tag: str, nb=None):
 	""" """
 	tag = tag.strip('#')
 
@@ -63,10 +65,11 @@ def _collect_public_graph(nb=None):
 
 
 @pass_nb
-def _create_link_graph(name: str='', nb=None):
+def _create_link_graph(note: Note, nb=None):
+	""" --note	-> nb/graph-{note}.md 
 	"""
-	:param name: note name
-	"""
+	name = note.name
+
 	ll = [ch for ch in ascii_uppercase] # ["A", "B", "C", ...]
 
 	for i in range(2, 31): # support ~800 notes here (but mermaid might break)
@@ -103,6 +106,40 @@ def _create_link_graph(name: str='', nb=None):
 		outstr += f"\n[[{n.name}]]"
 	
 	nb.generate_note(f'graph-{name}', outstr, overwrite=True)
+
+
+
+@pass_nb
+def _collect_all_graphs(nb=None):
+	""" if ```mermaid``` [[]] -> nb/all graphs.md
+	"""
+	ns = "\n\n--- \n"
+	
+	glnks = {}
+	for n in nb.notes.values():
+		_graph = False
+		if n.name.startswith('graph-'):
+			_graph = True
+			glnks.update({f"[[{n.name}]]\n": _graph})
+
+		if not _graph:
+			for cb in n.cblocks:
+				if cb.startswith('mermaid'):
+					glnks.update({f"[[{n.name}]]\n": _graph})
+
+	gs = [k for k,v in glnks.items() if not v]
+	_gs = [k for k,v in glnks.items() if v]
+
+	for g in _gs:
+		ns += g
+
+	ns += "\n\n--- \n"
+
+	for g in gs:
+		ns += g
+
+	nb.generate_note('all graphs', ns, overwrite=True)
+
 
 
 

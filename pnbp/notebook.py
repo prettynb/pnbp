@@ -96,6 +96,10 @@ class Notebook:
 
 		self.notes = dict(sorted(self.notes.items()))
 
+	def open(self):
+		""" """
+		self.open_md()
+
 	def generate_note(self, name, md_out, overwrite=False):
 		""" 
 		:param name: the name of the note (without ".md") to generate

@@ -5,10 +5,16 @@ import subprocess
 
 from pnbp.wrappers import pass_nb, arrow_call
 
-from .tasks import _collect_tasks_note 		# NOTE: all imported to and locally defined collect.py
-from .graph import _collect_public_graph 	# "_collect" fxns are called in _nb_collect_all (nb-collect-all)
-from .subl import _collect_subl_projs 		# and made avail individually (e.g. collect-tasks-note) automatically
-
+"""
+NOTE: all imported to and locally defined collect.py
+"_collect" fxns are called in _nb_collect_all (nb-collect-all)
+and made avail individually (e.g. collect-tasks-note) automatically
+"""
+from .code import _collect_code_blocked
+from .tasks import _collect_tasks_note
+from .graph import _collect_public_graph, _collect_all_graphs
+from .subl import _collect_subl_projs
+from .cleanup import _collect_nonexistant_links, _collect_unlinked_mentions
 
 
 """ commands writing collections to specific notebook files:
