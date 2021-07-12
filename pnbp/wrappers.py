@@ -31,11 +31,11 @@ def pass_nb(func):
 			kwargs.update({'nb': nb})
 
 		if not isinstance(kwargs['nb'], Notebook):
-			print('fresh nb open by pass_ wrapping...')
+			# print('fresh nb open by pass_ wrapping...')
 			kwargs['nb'] = Notebook()
 
 		if (note := kwargs.get('note')):
-			print('**', note)
+			# print('**', note)
 			if isinstance(note, str):
 				if (n := kwargs['nb'].get(note)):
 					kwargs['note'] = n

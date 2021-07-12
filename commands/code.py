@@ -33,13 +33,19 @@ def _collect_code_blocked(nb=None):
 				if not LANG_EXTS.get(cb.split()[0]):
 					_c.remove(cb)
 				if cb.startswith('mermaid'):
-					_c.remove(cb)
+					try:
+						_c.remove(cb)
+					except ValueError:
+						# ValueError: list.remove(x): x not in list
+						pass
+
 
 			if _c:
 				# if there's extension-ed code in the file:
 				ns += f'[[{n.name}]]\n'
 
 	nb.generate_note('all code blocked', ns, overwrite=True)
+
 
 
 @pass_nb
@@ -79,6 +85,7 @@ def _extract_code_blocks(lang: str, note: Note, nb=None):
 		if extn:
 			with open(os.path.join(cpth, f'{n.name}.{extn}'), 'w') as f:
 				f.write(cs)
+
 
 
 @pass_nb

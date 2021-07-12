@@ -15,6 +15,7 @@ from commands import tasks
 from commands import subl
 from commands import graph
 from commands import code
+from commands import pprint
 
 
 
@@ -97,7 +98,7 @@ def _create_command(func):
 	cmd = cli.command()
 
 	if 'note' in inspect.signature(func).parameters.keys():
-		func = click.option('--note', type=str, help='the name of a note', required=True)(func)
+		func = click.option('-n', '--note', type=str, help='the name of a note', required=True)(func)
 	func = arrow_call(func)
 
 	return cmd(func)
@@ -138,6 +139,9 @@ def create_all_commands():
 
 	create_command(code._extract_code_blocks)
 	create_command(code._extract_all_codeblocks)
+
+	create_command(pprint._nb_pprint)
+
 
 
 

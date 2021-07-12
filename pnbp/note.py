@@ -226,6 +226,10 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 		else:
 			print("Sucessful pprotect release. Don't forget to save!")
 
+	def md_out_to_html(self, nb):
+		""" """
+		self.md_out = nb.convert_to_html(self)
+
 	def prepend_section(self, content):
 		""" add an section to the beginning of the .md content
 			(or .md_out content instead if exists)
@@ -296,6 +300,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			cont = f'\n\n--- \n{d_today}\n\n'
 			self.prepend_section(cont)
 			self.save(nb)
+
 
 
 

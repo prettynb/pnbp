@@ -5,6 +5,7 @@ import datetime
 from collections import defaultdict
 from getpass import getpass
 # from pathlib import Path
+import difflib
 
 import markdown as md
 import requests
@@ -125,7 +126,7 @@ class Notebook:
 			n = name
 			return self.notes.get(n.name)
 
-		name = name.replace('.md', '').replace('.html', '')
+		name = name.replace('.md', '').replace('.html', '').replace('\\', '')
 
 		if (note := self.notes.get(name)):
 			return note
@@ -134,7 +135,17 @@ class Notebook:
 			if n.slugname == name:
 				return n
 
+		try: 
+			name_in = name
+			name = difflib.get_close_matches(name, [n for n in self.notes.keys()])[0]
+			print(f"^^ {name} (by close match) ")
+			return self.get(name)
+
+		except IndexError:
+			print(f"note: `{name_in}` does not exist in the notebook!")
+
 		return None
+
 
 	def get_tagged(self, tag)->list:
 		""" 
