@@ -84,7 +84,11 @@ def _extract_code_blocks(lang: str, note: Note, nb=None):
 
 		if extn:
 			with open(os.path.join(cpth, f'{n.name}.{extn}'), 'w') as f:
-				f.write(cs)
+				if extn == 'json':
+					json.dump(cs, f, indent=4)
+				else:
+					f.write(cs)
+
 
 
 

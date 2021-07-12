@@ -11,12 +11,11 @@ from pnbp.helpers import str_strip_link, add_link_mention
 def _fix_link_spacing(note:Note, nb=None):
 	""" [[ LINK ]] -> [[LINK]]
 	"""
+	n = note
 	p = re.compile(nb.MDS_INT_LNK)
 
-	for n in nb.notes.values():
-		if n.name == 'test1':
-			n.md_out = p.sub(str_strip_link, n.md)
-			n.save(nb)
+	n.md_out = p.sub(str_strip_link, n.md)
+	n.save(nb)		
 
 
 @pass_nb

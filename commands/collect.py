@@ -34,17 +34,20 @@ def _collect_all_stats(nb=None):
 		if n.name.startswith('all '):
 			cont += f"\n[[{n.name}]]"
 
+	# cont += '\n\nall else generated:'
+
 	nb.generate_note('all stats', cont, overwrite=True)
 
 
 @pass_nb
 def _collect_all_notes(nb=None):
-	""" all .md files linked 
-		-> nb/all notes.md
+	""" all .md files linked -> nb/all notes.md
 	"""
+	ns = sorted(list(nb.notes.values()), key=lambda n: n.mtime, reverse=True)
+
 	nb.generate_note(
 		'all notes',
-		"".join([f"[[{n.name}]]\n" for n in nb.notes.values()]),
+		"".join([f"[[{n.name}]] {n.mtime}\n" for n in ns]),
 		overwrite=True
 		)
 
@@ -71,7 +74,7 @@ def _collect_all_public(nb=None):
 	""" if note contains #public -> notebook/all public.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_tagged(nb.COMMIT_TAG)])
-	ns = "#public posts:\n\n --- \n\n " + ns
+	ns = "\n#public posts:\n\n --- \n\n " + ns
 
 	nb.generate_note('all public', ns, overwrite=True)
 
@@ -90,7 +93,7 @@ def _collect_terms(nb=None):
 	""" if found [[TERMS]] -> nb/TERMS.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_linked('TERMS')])
-	ns = "all [[TERMS]] :\n\n --- \n\n " + ns
+	ns = "\nall [[TERMS]] :\n\n --- \n\n " + ns
 
 	nb.generate_note('TERMS', ns, overwrite=True)
 
@@ -101,7 +104,7 @@ def _collect_all_unlinked(nb=None):
 		-> nb/all unlinked.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if not n.links])
-	ns = "all unlinked :\n\n --- \n\n " + ns
+	ns = "\nall unlinked :\n\n --- \n\n " + ns
 
 	nb.generate_note('all unlinked', ns, overwrite=True)
 
@@ -112,7 +115,7 @@ def _collect_all_empty(nb=None):
 		-> nb/all empty.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if len(n.md) < 4])
-	ns = "all empty :\n\n --- \n\n " + ns
+	ns = "\nall empty :\n\n --- \n\n " + ns
 
 	nb.generate_note('all empty', ns, overwrite=True)
 
@@ -136,7 +139,7 @@ def _collect_all_unheadered(nb=None):
 		-> nb/all unheadered.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if not n.header])
-	ns = "all unheadered :\n\n --- \n\n " + ns
+	ns = "\nall unheadered :\n\n --- \n\n " + ns
 
 	nb.generate_note('all unheadered', ns, overwrite=True)
 
@@ -146,8 +149,10 @@ def _collect_all_moc(nb=None):
 	""" "maps of content" via capitalization (e.g. [[PYTHON]]) 
 		-> nb/all MOC.md
 	"""
-	ns = "".join([f"[[{n.name}]]\n" for fn, n in nb.notes.items() if fn.isupper()])
-	ns = "all MOC :\n\n --- \n\n " + ns
+	ns = [n for n in nb.notes.values() if not n.is_tagged('#cont')]
+	ns = [n for n in ns if n.is_tagged('#moc') or n.name.isupper()]
+	ns = "".join([f"[[{n.name}]]\n" for n in ns])
+	ns = "\nall MOC :\n\n --- \n\n" + ns
 
 	nb.generate_note('all MOC', ns, overwrite=True)
 

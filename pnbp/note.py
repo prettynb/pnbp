@@ -84,9 +84,14 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 	@property
 	def header(self):
 		""" """
-		for i in (0, 1):
-			if re.match(r'^Links', self.sections[i]):
-				return self.sections[i]
+		try:
+			for i in (0, 1):
+				if re.match(r'^Links', self.sections[i]):
+					return self.sections[i]
+
+		except IndexError:
+			# an empty note 
+			pass
 		
 		return None
 
@@ -123,11 +128,37 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 
 			return nb.open_note(self)
 
-	def is_tagged(self, tag: str)->bool:
+	def is_tagged(self, tag: str="", tags: list=[], to_all=False, at_all=False)->bool:
 		""" check if note.md contains a #tag
 
 		:param tag: the #tag in question
+		:param tags: a list of possible tags
+		:param to_all: to_all=True requires that all entered param tags are found in self.md
+		:param at_all: at_all=True as the only paramater will return False if note has no tags at all
 		"""
+		if not tag and not tags and at_all and self.tags:
+			return True
+
+		if not tag and not tags and not at_all:
+			msg = "Did you mean to call is_tagged(at_all=True)? Otherwise,\n"
+			raise ValueError(f"{msg}provide e.g. is_tagged(tag='#examp'), or is_tagged(tags=['#find', '#us'], to_all=True)")
+
+		if tags or isinstance(tag, list):
+			# handling for poss pos arg entry
+			if not tags:
+				tags = tag
+
+			res = []
+			for tag in tags:
+				if self.is_tagged(tag):
+					if not to_all:
+						return True
+					else:
+						res.append(tag)
+
+			if res == tags:
+				return True
+
 		tag = f"#{tag.lstrip('#')}" #failsafe
 
 		if tag in self.tags:
@@ -135,18 +166,39 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			
 		return False
 
-	def is_linked(self, link: str="", at_all=False)->bool:
+	def is_linked(self, link: str="", links: list=[], to_all=False, at_all=False)->bool:
 		""" check if note.md contains a [[link]]
 
 		:param link: the [[link]] in question
+		:param links: 
+		:param to_all:
+		:param at_all:
 		"""
-		if at_all and self.links:
+		if not link and not links and at_all and self.links:
 			return True
 
-		if not link and not at_all:
-			raise ValueError("Did you mean to call is_linked(at_all=True)?\nOtherwise, provide is_linked(link='internal-link-looking-for')")
+		if not link and not links and not at_all:
+			msg = "Did you mean to call is_linked(at_all=True)? Otherwise,\n"
+			raise ValueError(f"{msg}provide e.g. is_linked('some-note'), or is_linked(links=['note-a', 'note-b'], to_all=True)")
 
-		if link in self.links:
+		if links or isinstance(link, list):
+			if not links:
+				links = link
+
+			res = []
+			for link in links:
+				if self.is_linked(link):
+					if not to_all:
+						return True
+					else:
+						res.append(link)
+
+			if res == links:
+				return True
+
+		link = link.replace('[', '').replace(']', '').strip().lower()
+
+		if link in [l.lower() for l in self.links]:
 			return True
 
 		return False
@@ -227,7 +279,8 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			print("Sucessful pprotect release. Don't forget to save!")
 
 	def md_out_to_html(self, nb):
-		""" """
+		""" 
+		"""
 		self.md_out = nb.convert_to_html(self)
 
 	def prepend_section(self, content):

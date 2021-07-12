@@ -31,6 +31,7 @@ class Notebook:
 	HTTP_NAKED_LNK = r'([^\(])(https?://[^;,\s\]\*]+)'
 
 	COMMIT_TAG = '#public'
+	EXCLUDE_TAG = '#private'
 
 	def __init__(self):
 
@@ -363,7 +364,8 @@ class Notebook:
 
 		print(f'\nlocal commit: {self.HTML_PATH}')
 		for n in self.notes.values():
-			if re.search(self.COMMIT_TAG, n.md):
+			# if re.search(self.COMMIT_TAG, n.md):
+			if n.is_tagged(self.COMMIT_TAG) and not n.is_tagged(self.EXCLUDE_TAG):
 				nout = self.convert_to_html(note=n)
 				of = open(os.path.join(self.HTML_PATH, f"{n.slugname}.html"), 'w')
 				of.write(nout)
@@ -475,7 +477,8 @@ class Notebook:
 		for n in self.notes.values():
 			to_post = False
 			fname = n.slugname + '.html'
-			if re.search(self.COMMIT_TAG, n.md):
+			# if re.search(self.COMMIT_TAG, n.md):
+			if n.is_tagged(self.COMMIT_TAG) and not n.is_tagged(self.EXCLUDE_TAG):
 				post_names.append(fname)
 				if fname in pub_pub_names:
 					if pub_pub_data[fname] < n.mtime: # change has occured 
