@@ -67,6 +67,7 @@ def nb_commit_remote():
 	nb = Notebook()
 	nb.post_commits_to_blog_api()
 
+
 @cli.command()
 def nb_commit_local():
 	""" commit -> localhost pnbp-blog instance
@@ -74,6 +75,16 @@ def nb_commit_local():
 	nb = Notebook()
 	nb.API_BASE = 'http://127.0.0.1:8000'
 	nb.post_commits_to_blog_api()
+
+
+@cli.command()
+def nb_commit_stage():
+	""" *only* print nb-commit- changes against nb.API_BASE
+		to the terminal (staging view)
+	"""
+	nb = Notebook()
+	nb.post_commits_to_blog_api(stage_only=True)
+
 
 
 
@@ -93,22 +104,49 @@ def _create_command(func):
 	
 	As actively wrapping here (vs calling _outer_act_cmd()),
 	has the nice feature of passing the _cmd's docstring to the --help info.
+
+	:param func: 
 	"""
 	func.__name__ = func.__name__.lstrip('_')
+
+	if not func.__name__.startswith('nb'):
+		func.__name__ = f'nb_{func.__name__}'
+
 	cmd = cli.command()
 
 	if 'note' in inspect.signature(func).parameters.keys():
 		func = click.option('-n', '--note', type=str, help='the name of a note', required=True)(func)
+
 	func = arrow_call(func)
 
 	return cmd(func)
 
+
 def create_command(func):
 	""" actually instantiating the command
 		and specifically setattr-ing here after built is necessary
+
+	:param func: 
 	"""
 	c = _create_command(func)
 	setattr(sys.modules[__name__], func.__name__.lstrip('_'), c)
+
+
+def create_commands(module, _all=False):
+	""" 
+
+	:param module: an commands/module.py imported above
+	:param _all: _all=True will create a command from all leading underscore _func_name of module
+	"""
+	for k,v in module.__dict__.items():
+		# print(k) # _func's name...
+		if _all:
+			if inspect.isfunction(v) and k.startswith('_'):
+				create_command(v)
+		else:
+			# leave open for additional bool switches
+			pass
+
 
 
 def create_all_commands():
@@ -116,10 +154,12 @@ def create_all_commands():
 		and tacking them onto the click.group(), & module local() name cli
 	"""
 	# looking into imports from commands/collect.py
-	for k,v in coll.__dict__.items(): 
-		if inspect.isfunction(v) and k.startswith('_'):
-			# print(k) # _func's name...
-			create_command(v)
+	# for k,v in coll.__dict__.items(): 
+	# 	if inspect.isfunction(v) and k.startswith('_'):
+	# 		# print(k) # _func's name...
+	# 		create_command(v)
+
+	create_commands(coll, _all=True)
 
 	create_command(tasks._nb_task_settle)
 

@@ -1,1 +1,1 @@
-from .models import Notebook, Note
+from .models import Notebook

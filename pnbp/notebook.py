@@ -35,19 +35,57 @@ class Notebook:
 
 	def __init__(self):
 
-		self.conf_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.json')
-		# conf_file = Path(__file__).parent / 'settings.json' # same thing
-		# with conf_file.open() as cf:
+		self.NOTE_PATH = os.environ.get('NOTE_PATH')
+		self.IMG_PATH = os.environ.get('IMG_PATH')
+		self.HTML_PATH = os.environ.get('HTML_PATH')
+
+		if not self.NOTE_PATH:
+			raise ImportError("required to set NOTE_PATH environment variable to init a Notebook instance!")
+
+		self.conf_file = os.path.join(self.NOTE_PATH, 'pnbp_conf.json')
 
 		if not os.path.exists(self.conf_file):
-			raise ImportError("required settings.json file not found, please see settings_template.json")
-		
-		with open(self.conf_file) as cf:
-			self.config = json.load(cf)
+			if not os.environ.get('NOTE_CONFIG') == 'off':
+				print("an NOTE_PATH/pnbp-config.json file not found.")
+				gen_empt = input("generate it from a template? (y/n): ")
+				if gen_empt.lower() == 'y':
 
-		self.NOTE_PATH = self.config.get('NOTE_PATH')
-		self.IMG_PATH = self.config.get('IMG_PATH')
-		self.HTML_PATH = self.config.get('HTML_PATH')
+					empty_conf = {
+							"IMG_PATH": "", "HTML_PATH": "", "VENV_PATH": "", 
+							"API_BASE": "http://127.0.0.1:8000",
+							"API_TOKEN": "", "PUB_LNK_ONLY": False,
+							"NAV_BRAND": "", "NAV_PAGES": {},
+							"FOOTER": "", "darkmode": False,
+							"hljs_light": "default", "hljs_dark": "xt256",
+							"merm_light": "default", "merm_dark": "dark",
+							"COMMIT_TAG": '#public', "EXCLUDE_TAG": '#private',
+							"HIDE_COMMIT_TAG": False, 
+							}
+					
+					with open(self.conf_file, 'w') as cf:
+						json.dump(empty_conf, cf, indent=4)
+
+					print(f"generated (most empty/default) from template to\n{self.NOTE_PATH}/pnbp-config.json: \n{json.dumps(empty_conf, indent=4)}")
+				else:
+					print("NOTE_PATH/pnbp-config.json is only soft required, please see pnbp/settings_template.json for details.")
+					print("Suppress warning+template offer message in the future by setting NOTE_CONFIG environment variable to 'off'.")
+					self.conf_file = False
+			else:
+				self.conf_file = False
+
+		if self.conf_file:
+			with open(self.conf_file) as cf:
+				self.config = json.load(cf)
+		else:
+			self.config = {} # lazy handle existance for conf_file=False
+
+		if not self.IMG_PATH:
+			# prefering set environment variable
+			self.IMG_PATH = self.config.get('IMG_PATH')
+
+		if not self.HTML_PATH:
+			# but available to set in self.config 
+			self.HTML_PATH = self.config.get('HTML_PATH')
 
 		self.API_BASE = self.config.get('API_BASE')
 		self.API_TOKEN = self.config.get('API_TOKEN')
@@ -55,11 +93,19 @@ class Notebook:
 
 		self.VENV_PATH = self.config.get('VENV_PATH') # see commands/subl.py
 
+		if (tag := self.config.get("COMMIT_TAG")):
+			# overwrite class default:
+			self.COMMIT_TAG = tag
+
+		if (tag := self.config.get("EXCLUDE_TAG")):
+			# ... 
+			self.EXCLUDE_TAG = tag
+
 		self.notes = defaultdict()
 		self.open_md()
 
 	def __len__(self):
-		""" """
+		""" the number of notes """
 		return len(self.notes.keys())
 
 	def open_note(self, f):
@@ -327,6 +373,12 @@ class Notebook:
 
 		return p.sub(extlnk_repl, note)
 
+	def hide_commit_tag(self, note):
+		""" remove the #public tag from notes 
+		"""
+		return note.replace(self.COMMIT_TAG, '')
+
+
 	def convert_to_html(self, note):
 		""" apply all the regex method changes to 
 			a single note
@@ -337,6 +389,9 @@ class Notebook:
 			note = self.remove_nonpub_links(note)
 		else:
 			note = note.md
+
+		if self.config.get('HIDE_COMMIT_TAG') == True:
+			note = self.hide_commit_tag(note)
 
 		nout = self.replace_imglinks(note)
 		nout = self.replace_intlinks(nout)
@@ -460,8 +515,10 @@ class Notebook:
 		print(f'(removed) {r.json()["pub_name"]} -> {r}')
 
 
-	def post_commits_to_blog_api(self):
+	def post_commits_to_blog_api(self, stage_only=False):
 		""" the main POST method
+
+		:param stage_only: if stage_only, print #public and don't commit
 		"""
 		self.open_md() # fresh retrival
 		h = self.get_headers()
@@ -472,7 +529,7 @@ class Notebook:
 		pub_img_data = self.get_img_commits()
 		pub_img_names = pub_img_data.keys()
 
-		print(f'\nremote commit:')
+		print(f'\ncommits: (to {self.API_BASE})')
 		post_names = []
 		for n in self.notes.values():
 			to_post = False
@@ -486,7 +543,7 @@ class Notebook:
 				else: # it's newly #public
 					to_post = True
 
-			if to_post:
+			if to_post and not stage_only:
 				nout = self.convert_to_html(note=n)
 				r = requests.post(f'{self.API_BASE}/api/publishment',
 					json={"name": n.slugname, "content": nout},
@@ -510,9 +567,24 @@ class Notebook:
 					else:
 						print(f'\t\t{img} -> EXISTS!')
 
-		for p in pub_pub_names:
-			if p not in post_names:
-				self.delete_unlisted_post(p)
+		if not stage_only:
+			for p in pub_pub_names:
+				if p not in post_names:
+					self.delete_unlisted_post(p)
+		else:
+			print("\nnew pub: ")
+			for p in [n for n in post_names if not n in pub_pub_names]:
+				print(f'-> {p}')
+
+			print("\nto remove:")
+			for p in [n for n in pub_pub_names if not n in post_names]:
+				print(f'-> {p}')
+
+			print("\nall current pubs: ")
+			for p in post_names:
+				print(f'-> {p}')
+
+			print("\n\n** stage_only=True, no changes made... ***")
 
 	def blog_settings_post(self):
 		""" request method to POST layout update 
@@ -522,9 +594,27 @@ class Notebook:
 		"""
 		h = self.get_headers()
 
-		with open(os.path.join(self.NOTE_PATH, 'blog-settings.json'), 'r') as f:	
-			r = requests.post(f'{self.API_BASE}/api/layout', json=json.load(f), headers=h)
-			print(r)
+		_config = self.config.copy()
+
+		bs_keys = tuple([
+						"NAV_BRAND",
+						"NAV_PAGES", 
+						"FOOTER", 
+						"darkmode", 
+						"hljs_light", "hljs_dark", 
+						"merm_light", "merm_dark"
+						])
+
+		for k in self.config.keys():
+			if not k in bs_keys:
+				del _config[k]
+
+		r = requests.post(f'{self.API_BASE}/api/layout', json=_config, headers=h)
+		print(r)
+
+		# with open(os.path.join(self.NOTE_PATH, 'pnbp-blog-settings.json'), 'r') as f:
+		# 	r = requests.post(f'{self.API_BASE}/api/layout', json=json.load(f), headers=h)
+		# 	print(r)
 
 	def create_api_user(self, username=''):
 		""" request method to generate an pnbp-blog API user 

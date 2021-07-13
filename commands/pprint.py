@@ -54,8 +54,6 @@ def get_rich_note(note=Note, nb=None):
 	nano_new_link = f'nano: [new note]({nano_path}/{new_name})'
 	frame = f'\n --- \n\n{menu_header}\n{refresh_link}\n{nano_edit_link}\n{nano_new_link}\n\n--- \n\n'
 
-	# n.md_out = (n.md_out+'\n--- ' if not n.md.strip().endswith('---') else n.md)
-
 	n.md_out = frame + n.md_out + frame
 
 	# adding 2x trailing spaces ensures single \n is rendered
