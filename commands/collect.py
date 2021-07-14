@@ -3,7 +3,7 @@ import re
 import inspect
 import subprocess
 
-from pnbp.wrappers import pass_nb, arrow_call
+from pnbp.wrappers import pass_nb
 
 """
 NOTE: all imported to and locally defined collect.py
@@ -198,9 +198,8 @@ def _collect_all_tags(nb=None):
 
 
 
+""" !!! NOTE: all imported _collect* calls here: 
 """
-"""
-@arrow_call
 @pass_nb
 def _nb_collect_all(nb=None):
 	""" perform all collect- commands in succession

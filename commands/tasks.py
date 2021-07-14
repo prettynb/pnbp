@@ -3,8 +3,6 @@ import datetime
 
 from pnbp.models import Notebook, Note
 from pnbp.wrappers import pass_nb
-from pnbp.helpers import md_task_uncheck, md_reoccurring_task_uncheck
-
 """
 	- #todo a task to record _complete and perm remove w/ #complete
 	- doesn't require todo tag to #complete
@@ -21,11 +19,30 @@ from pnbp.helpers import md_task_uncheck, md_reoccurring_task_uncheck
 	(&& -> record to nb/_complete.md under datestamp YYYY-MM-DD section, with 
 	additional param "@" timestamp collected - [x] task (p1:hello,@:12:33:58))
 """
+
 TASK_INCOMPLETE = r'(^|\s)(-\s\[\s\]\s)(.*)'
 TASK_COMPLETE = r'(^|\s)(-\s\[x\]\s)(.*)'
 
 TASK_VARS = r'\((.+)\)'
+
 COMPL_TAG = '#complete'
+
+
+"""
+"""
+def md_task_uncheck(matchobj):
+	""" str replacement func """
+	t = matchobj.group(3).strip().replace(r'\t', ' ')
+
+	if matchobj.group(1) == '\t':
+		return f'\t- [ ] {t}'
+
+	return f'- [ ] {t}'
+
+def md_reoccurring_task_uncheck(matchobj):
+	""" str replacement func """
+	return f'- [ ] {t}'
+
 
 
 # @pass_nb

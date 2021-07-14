@@ -11,23 +11,23 @@ import markdown as md
 import requests
 
 from .note import Note
-from .helpers import (Link, Url, CodeBlock, Tag, # int_link_repl,
-						_convert_datetime, add_header_attr_list)
+from .helpers import Link, Url, CodeBlock, Tag, _convert_datetime
 
 
 
 class Notebook:
 	""" class owned common regex patterns
 	"""
-	MDS_INT_LNK = r'\[\[([^]]+)\]\]' 
-	MDS_IMG_LNK = r'!\[\[([^]]+)\]\]'
-	MDS_INT_TAG = r'([^\\)/>\'\w])#([A-Za-z]+)' 
+	MDS_INT_LNK = Link.MDS_INT_LNK
+	MDS_IMG_LNK = Link.MDS_IMG_LNK
 
-	MD_CODE = r'```([^`]*)```'
-	MD_MERMAID = r'```mermaid([^`]*)```'
+	MDS_INT_TAG = Tag.MDS_INT_TAG
 
-	MD_EXT_LINK = r'\[([^]]+)\]\(([^)]+)\)'
-	HTTP_NAKED_LNK = r'([^\(])(https?://[^;,\s\]\*]+)'
+	MD_CODE = CodeBlock.MD_CODE
+	MD_MERMAID = CodeBlock.MD_MERMAID
+
+	MD_EXT_LINK = Url.MD_EXT_LINK
+	HTTP_NAKED_LNK = Url.HTTP_NAKED_LNK
 
 	COMMIT_TAG = '#public'
 	EXCLUDE_TAG = '#private'
@@ -282,7 +282,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(self.MDS_IMG_LNK)
-		return p.sub(Lin, note)
+		return p.sub(Link.regex_img_to_html, note)
 
 	def replace_intlinks(self, note):
 		""" a regex replace mtd 

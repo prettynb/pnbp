@@ -3,32 +3,17 @@ from collections import namedtuple
 
 
 
-""" tasks re.sub str replacement functions
-"""
-def md_task_uncheck(matchobj):
-	""" """
-	t = matchobj.group(3).strip().replace(r'\t', ' ')
-
-	if matchobj.group(1) == '\t':
-		return f'\t- [ ] {t}'
-
-	return f'- [ ] {t}'
-
-def md_reoccurring_task_uncheck(matchobj):
-	""" """
-	return f'- [ ] {t}'
-
-
-
-""" blog api connection helpers
+""" 
 """ 
 def _convert_datetime(dt: str):
-	""" 
+	""" mainly a helper function to convert from blog api,
+		also accepts dt="now" -> "2021-07-13 12:30:22"
+
 	:param dt: fastapi datetime object e.g. 
 		'2021-05-13T11:22:10.373376' or
 		'2019-12-15T15:32:34'
 
-	:returns: 2019-12-15 15:32:34
+	:returns: 2021-07-13 12:30:22
 	"""
 	if dt == 'now':
 		return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
@@ -43,12 +28,13 @@ def _convert_datetime(dt: str):
 
 
 
-""" base md -> html 
-	re.sub str replacement functions
+""" 
 """
 class Url(namedtuple('Url', ['url', 'label'])):
 	"""
 	"""
+	MD_EXT_LINK = r'\[([^]]+)\]\(([^)]+)\)'
+	HTTP_NAKED_LNK = r'([^\(])(https?://[^;,\s\]\*]+)'
 
 	def __new__(cls, url, label=None):
 		""" """
@@ -102,12 +88,16 @@ class Url(namedtuple('Url', ['url', 'label'])):
 			then rendered clickable on md.markdown()
 		"""
 		return f"{matchobj.group(1)}[{matchobj.group(2)}]({matchobj.group(2)})"
-	
+
 
 
 
 
 class Link(namedtuple('Link', ['link'])):
+	"""
+	"""
+	MDS_INT_LNK = r'\[\[([^]]+)\]\]' 
+	MDS_IMG_LNK = r'!\[\[([^]]+)\]\]'
 
 	def __repr__(self):
 		""" """
@@ -227,8 +217,13 @@ class Link(namedtuple('Link', ['link'])):
 
 
 
+
+
 class Tag(namedtuple('Tag', ['tag'])):
 	""" """
+
+	MDS_INT_TAG = r'([^\\)/>\'\w])#([A-Za-z]+)' 
+
 	def __eq__(self, b):
 		""" """
 		if isinstance(b, str):
@@ -249,9 +244,14 @@ class Tag(namedtuple('Tag', ['tag'])):
 
 
 
+
+
 class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 	"""
 	"""
+	MD_CODE = r'```([^`]*)```'
+	MD_MERMAID = r'```mermaid([^`]*)```'
+	
 	@staticmethod
 	def regex_mermaid_to_html(matchobj):
 		""" required "scripts" in blog/static/layout.html 
