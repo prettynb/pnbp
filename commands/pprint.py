@@ -6,6 +6,7 @@ from rich.markdown import Markdown
 
 from pnbp.models import Notebook, Note
 from pnbp.wrappers import pass_nb 
+from pnbp.helpers import Link
 
 
 
@@ -27,7 +28,7 @@ def get_rich_note(note=Note, nb=None):
 	"""
 	n = note 
 
-	p = re.compile(nb.MDS_INT_LNK)
+	p = re.compile(Link.MDS_INT_LNK)
 	n.md_out = p.sub(sub_for_this, n.md)
 
 	note_path_encoded = nb.NOTE_PATH.replace(' ' , '%20')

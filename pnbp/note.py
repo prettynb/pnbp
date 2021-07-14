@@ -42,7 +42,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 		
 		tags = list(set(all_tags)) # only legitimate #tag's remain
 		# urls = list(set(urls)) # <- doing here so that duplicate urls don't create tags
-		# links = list(set(links))
+
 		urls = [Url(u) for u in set(urls)]
 		links = [Link(l) for l in set(links)]
 
@@ -104,14 +104,12 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			return True
 		return None
 
-
 	@property
 	def footnotes(self):
 		""" """
 		if re.match(r'\[\^\d+\]: ', self.sections[-1]):
 			return True
 		return None
-
 
 	def save(self, nb):
 		""" save note to .md file on NOTE_PATH,
@@ -224,6 +222,11 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 
 		self.md_out = ns
 
+	def md_out_to_html(self, nb):
+		""" 
+		"""
+		self.md_out = nb.convert_to_html(self)
+
 	def prime_md_out_protect(self):
 		""" Replace links, tags, urls, cblocks
 			w/ an _key, saving all actual .md item values at
@@ -279,11 +282,6 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			self.save(nb)
 		else:
 			print("Sucessful pprotect release. Don't forget to save!")
-
-	def md_out_to_html(self, nb):
-		""" 
-		"""
-		self.md_out = nb.convert_to_html(self)
 
 	def prepend_section(self, content):
 		""" add an section to the beginning of the .md content
@@ -355,34 +353,6 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			cont = f'\n\n--- \n{d_today}\n\n'
 			self.prepend_section(cont)
 			self.save(nb)
-
-	@classmethod
-	def replace_strikethrough(cls, note_md):
-		""" a regex replace mtd 
-		
-		:param note: the .md content of an Note
-		"""
-		p = re.compile(r'(~~)(.*)(~~)')
-		strike_repl = lambda m: f'<s>{m.group(2)}</s>'
-
-		return p.sub(strike_repl, note_md)
-
-	@classmethod
-	def replace_eqhighlight(cls, note_md):
-		""" a regex replace mtd 
-		
-		:param note_md: the .md content of an Note
-		"""
-		p = re.compile(r'(==)(.*)(==)')
-		eqhl_repl = lambda m: f'<mark>{m.group(2)}</mark>'
-
-		return p.sub(eqhl_repl, note_md)
-
-
-
-
-
-
 
 
 

@@ -12,7 +12,7 @@ def _fix_link_spacing(note:Note, nb=None):
 	""" [[ LINK ]] -> [[LINK]]
 	"""
 	n = note
-	p = re.compile(nb.MDS_INT_LNK)
+	p = re.compile(Link.MDS_INT_LNK)
 
 	n.md_out = p.sub(Link.str_strip_name, n.md)
 	n.save(nb)
