@@ -276,53 +276,53 @@ class Notebook:
 	""" md->html str repl methods
 		coupled with fxn from helpers.py
 	"""
-	def replace_imglinks(self, note):
-		""" a regex replace mtd 
+	# def replace_imglinks(self, note):
+	# 	""" a regex replace mtd 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(self.MDS_IMG_LNK)
-		return p.sub(Link.regex_img_to_html, note)
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(self.MDS_IMG_LNK)
+	# 	return p.sub(Link.regex_img_to_html, note)
 
-	def replace_intlinks(self, note):
-		""" a regex replace mtd 
+	# def replace_intlinks(self, note):
+	# 	""" a regex replace mtd 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(self.MDS_INT_LNK)
-		return p.sub(Link.regex_to_html, note)
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(self.MDS_INT_LNK)
+	# 	return p.sub(Link.regex_to_html, note)
 
-	def replace_smdtags(self, note):
-		""" a regex replace mtd 
+	# def replace_smdtags(self, note):
+	# 	""" a regex replace mtd 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(self.MDS_INT_TAG)
-		return p.sub(Tag.regex_to_html, note)
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(self.MDS_INT_TAG)
+	# 	return p.sub(Tag.regex_to_html, note)
 
-	def replace_mermaid(self, note):
-		""" a regex replace mtd 
+	# def replace_mermaid(self, note):
+	# 	""" a regex replace mtd 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(self.MD_MERMAID)
-		return p.sub(CodeBlock.regex_mermaid_to_html, note)
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(self.MD_MERMAID)
+	# 	return p.sub(CodeBlock.regex_mermaid_to_html, note)
 
-	def replace_nakedhref(self, note):
-		""" a regex replace mtd 
+	# def replace_nakedhref(self, note):
+	# 	""" a regex replace mtd 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(self.HTTP_NAKED_LNK)
-		return p.sub(Url.regex_nakedhref_to_md, note)
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(self.HTTP_NAKED_LNK)
+	# 	return p.sub(Url.regex_nakedhref_to_md, note)
 
-	def fix_blocked_comments(self, note):
-		""" a regex replace mtd 
+	# def fix_blocked_comments(self, note):
+	# 	""" a regex replace mtd 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')
-		return p.sub(CodeBlock.regex_unescape_comments, note)
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')
+	# 	return p.sub(CodeBlock.regex_unescape_comments, note)
 
 	def remove_nonpub_links(self, note):
 		""" if #public note with [[not public]] links,
@@ -342,51 +342,53 @@ class Notebook:
 
 		return note.md_out
 
-	def add_header_ids(self, note):
-		""" providing access to sublink-ed via 
-			[[mynote#section2]] to html 
+	# def add_header_ids(self, note_md):
+	# 	""" providing access to sublink-ed via 
+	# 		[[mynote#section2]] to html 
 
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(r'(#{1,6}\s)(.*)')
+	# 	:param note_md: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(r'(#{1,6}\s)(.*)')
 
-		return p.sub(Link.regex_append_subheader_attr_list, note)
+	# 	return p.sub(Link.regex_append_subheader_attr_list, note_md)
 
-	def replace_strikethrough(self, note):
-		""" ... 
+	# def replace_strikethrough(self, note_md):
+	# 	""" ... 
 		
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(r'(~~)(.*)(~~)')
-		strike_repl = lambda m: f'<s>{m.group(2)}</s>'
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(r'(~~)(.*)(~~)')
+	# 	strike_repl = lambda m: f'<s>{m.group(2)}</s>'
 
-		return p.sub(strike_repl, note)
+	# 	return p.sub(strike_repl, note_md)
 
-	def replace_eqhighlight(self, note):
-		""" ... 
+	# def replace_eqhighlight(self, note_md):
+	# 	""" ... 
 		
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(r'(==)(.*)(==)')
-		eqhl_repl = lambda m: f'<mark>{m.group(2)}</mark>'
+	# 	:param note_md: the .md content of the Note
+	# 	"""
+	# 	p = re.compile(r'(==)(.*)(==)')
+	# 	eqhl_repl = lambda m: f'<mark>{m.group(2)}</mark>'
 
-		return p.sub(eqhl_repl, note)
+	# 	return p.sub(eqhl_repl, note_md)
 
-	def adjust_externallinks(self, note):
-		""" adding external link symbol, nofollow, and _blank target
+	# def adjust_externallinks(self, note):
+	# 	""" adding external link symbol, nofollow, and _blank target
 
-		:param note: the .md content of the Note
-		"""
-		_ext_icon = '<i class="bi bi-box-arrow-up-right" style="font-size:10px;"></i>'
-		_add_attrs = 'rel="nofollow" target="_blank"'
+	# 	:param note: the .md content of the Note
+	# 	"""
+	# 	_ext_icon = '<i class="bi bi-box-arrow-up-right" style="font-size:10px;"></i>'
+	# 	_add_attrs = 'rel="nofollow" target="_blank"'
 
-		p = re.compile(r'<a href="(.*)">(.*)</a>') # taking advantage of our repl internal linked href='' vs ""
-		extlnk_repl = lambda m: f'<a {_add_attrs} href="{m.group(1)}">{m.group(2)}</a> {_ext_icon}'
+	# 	p = re.compile(r'<a href="(.*)">(.*)</a>') # taking advantage of our repl internal linked href='' vs ""
+	# 	extlnk_repl = lambda m: f'<a {_add_attrs} href="{m.group(1)}">{m.group(2)}</a> {_ext_icon}'
 
-		return p.sub(extlnk_repl, note)
+	# 	return p.sub(extlnk_repl, note)
 
 	def hide_commit_tag(self, note):
 		""" remove the #public tag from notes 
+
+		:param note:
 		"""
 		return note.replace(self.COMMIT_TAG, '')
 
@@ -395,7 +397,7 @@ class Notebook:
 		""" apply all the regex method changes to 
 			a single note
 
-		:param note: the .md content of the Note
+		:param note: an Note instance
 		"""
 		if self.PUB_LNK_ONLY:
 			note = self.remove_nonpub_links(note)
@@ -405,20 +407,20 @@ class Notebook:
 		if self.config.get('HIDE_COMMIT_TAG') == True:
 			note = self.hide_commit_tag(note)
 
-		nout = self.replace_imglinks(note)
-		nout = self.replace_intlinks(nout)
-		nout = self.replace_smdtags(nout)
-		nout = self.replace_mermaid(nout)
-		nout = self.replace_nakedhref(nout)
+		nout = Link.replace_imglinks(note)
+		nout = Link.replace_intlinks(nout)
+		nout = Tag.replace_smdtags(nout)
+		nout = CodeBlock.replace_mermaid(nout)
+		nout = Url.replace_nakedhref(nout)
 
-		nout = self.add_header_ids(nout)
+		nout = Link.add_header_ids(nout)
 
 		nout = md.markdown(nout, extensions=['fenced_code',	'nl2br', 'markdown.extensions.tables', 'attr_list', 'footnotes'], use_pygments=True)
 
-		nout = self.fix_blocked_comments(nout)
-		nout = self.replace_strikethrough(nout)
-		nout = self.replace_eqhighlight(nout)
-		nout = self.adjust_externallinks(nout)
+		nout = CodeBlock.fix_blocked_comments(nout)
+		nout = Note.replace_strikethrough(nout)
+		nout = Note.replace_eqhighlight(nout)
+		nout = Url.adjust_externallinks(nout)
 
 		return nout
 

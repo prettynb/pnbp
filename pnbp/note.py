@@ -356,6 +356,28 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			self.prepend_section(cont)
 			self.save(nb)
 
+	@classmethod
+	def replace_strikethrough(cls, note_md):
+		""" a regex replace mtd 
+		
+		:param note: the .md content of an Note
+		"""
+		p = re.compile(r'(~~)(.*)(~~)')
+		strike_repl = lambda m: f'<s>{m.group(2)}</s>'
+
+		return p.sub(strike_repl, note_md)
+
+	@classmethod
+	def replace_eqhighlight(cls, note_md):
+		""" a regex replace mtd 
+		
+		:param note_md: the .md content of an Note
+		"""
+		p = re.compile(r'(==)(.*)(==)')
+		eqhl_repl = lambda m: f'<mark>{m.group(2)}</mark>'
+
+		return p.sub(eqhl_repl, note_md)
+
 
 
 

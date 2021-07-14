@@ -1,3 +1,4 @@
+import re
 import datetime
 from collections import namedtuple
 
@@ -88,6 +89,29 @@ class Url(namedtuple('Url', ['url', 'label'])):
 			then rendered clickable on md.markdown()
 		"""
 		return f"{matchobj.group(1)}[{matchobj.group(2)}]({matchobj.group(2)})"
+
+	@classmethod
+	def replace_nakedhref(self, note_md):
+		""" a regex replace mtd 
+
+		:param note_md: the .md content of an Note
+		"""
+		p = re.compile(self.HTTP_NAKED_LNK)
+		return p.sub(Url.regex_nakedhref_to_md, note_md)
+
+	@classmethod
+	def adjust_externallinks(cls, note_md):
+		""" adding external link symbol, nofollow, and _blank target
+
+		:param note_md: the .md content of an Note
+		"""
+		_ext_icon = '<i class="bi bi-box-arrow-up-right" style="font-size:10px;"></i>'
+		_add_attrs = 'rel="nofollow" target="_blank"'
+
+		p = re.compile(r'<a href="(.*)">(.*)</a>') # taking advantage of our repl internal linked href='' vs ""
+		extlnk_repl = lambda m: f'<a {_add_attrs} href="{m.group(1)}">{m.group(2)}</a> {_ext_icon}'
+
+		return p.sub(extlnk_repl, note_md)
 
 
 
@@ -215,6 +239,35 @@ class Link(namedtuple('Link', ['link'])):
 		""" """
 		return matchobj.group(2)
 
+	@classmethod
+	def replace_imglinks(cls, note_md):
+		""" a regex replace mtd 
+
+		:param note_md: the .md content of the Note
+		"""
+		p = re.compile(cls.MDS_IMG_LNK)
+		return p.sub(Link.regex_img_to_html, note_md)
+
+	@classmethod
+	def replace_intlinks(cls, note):
+		""" a regex replace mtd 
+
+		:param note: the .md content of the Note
+		"""
+		p = re.compile(cls.MDS_INT_LNK)
+		return p.sub(Link.regex_to_html, note)
+
+	@classmethod
+	def add_header_ids(cls, note_md):
+		""" providing access to sublink-ed via 
+			[[mynote#section2]] to html 
+
+		:param note_md: the .md content of the Note
+		"""
+		p = re.compile(r'(#{1,6}\s)(.*)')
+
+		return p.sub(Link.regex_append_subheader_attr_list, note_md)
+
 
 
 
@@ -242,6 +295,15 @@ class Tag(namedtuple('Tag', ['tag'])):
 		"""
 		return f"{matchobj.group(1)}\\#{matchobj.group(2)}"
 
+	@classmethod
+	def replace_smdtags(cls, note_md):
+		""" a regex replace mtd 
+
+		:param note_md: the .md content of an Note
+		"""
+		p = re.compile(cls.MDS_INT_TAG)
+		return p.sub(Tag.regex_to_html, note_md)
+
 
 
 
@@ -267,6 +329,27 @@ class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 		_code = matchobj.group(2).replace('\#', '#')
 
 		return f'<code class="{matchobj.group(1)}">{_code}</code>'
+
+	@classmethod
+	def replace_mermaid(cls, note_md):
+		""" a regex replace mtd 
+
+		:param note_md: the .md content of an Note
+		"""
+		p = re.compile(cls.MD_MERMAID)
+		return p.sub(CodeBlock.regex_mermaid_to_html, note_md)
+
+	@classmethod
+	def fix_blocked_comments(cls, note_md):
+		""" a regex replace mtd 
+
+		:param note_md: the .md content of an Note
+		"""
+		p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')
+		return p.sub(CodeBlock.regex_unescape_comments, note_md)
+
+	
+
 
 
 
