@@ -2,10 +2,53 @@ import datetime
 from collections import namedtuple
 
 
+
+""" tasks re.sub str replacement functions
+"""
+def md_task_uncheck(matchobj):
+	""" """
+	t = matchobj.group(3).strip().replace(r'\t', ' ')
+
+	if matchobj.group(1) == '\t':
+		return f'\t- [ ] {t}'
+
+	return f'- [ ] {t}'
+
+def md_reoccurring_task_uncheck(matchobj):
+	""" """
+	return f'- [ ] {t}'
+
+
+
+""" blog api connection helpers
+""" 
+def _convert_datetime(dt: str):
+	""" 
+	:param dt: fastapi datetime object e.g. 
+		'2021-05-13T11:22:10.373376' or
+		'2019-12-15T15:32:34'
+
+	:returns: 2019-12-15 15:32:34
+	"""
+	if dt == 'now':
+		return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+	try:
+		return datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f')
+	except ValueError:
+		try:
+			return datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
+		except:
+			raise Exception(f'Something went wrong with the format parsing of {dt}')
+
+
+
 """ base md -> html 
 	re.sub str replacement functions
 """
 class Url(namedtuple('Url', ['url', 'label'])):
+	"""
+	"""
 
 	def __new__(cls, url, label=None):
 		""" """
@@ -50,6 +93,15 @@ class Url(namedtuple('Url', ['url', 'label'])):
 			return ".".join(self.baseurl.split('.')[-2:])
 
 		return None
+
+	@staticmethod
+	def regex_nakedhref_to_md(matchobj):
+		""" regex replacement function for e.g. http://www.blahblahblah.com -> 
+			[http://www.blahblahblah.com](http://www.blahblahblah.com)
+			markdown syntax so that on md -> html, these links are 
+			then rendered clickable on md.markdown()
+		"""
+		return f"{matchobj.group(1)}[{matchobj.group(2)}]({matchobj.group(2)})"
 	
 
 
@@ -133,8 +185,6 @@ class Link(namedtuple('Link', ['link'])):
 
 		return self.link
 
-
-	# link
 	@staticmethod
 	def regex_to_html(matchobj):
 		""" regex replacement function for [[]] internal wiki links -> mysite.com/single-slug
@@ -145,111 +195,89 @@ class Link(namedtuple('Link', ['link'])):
 
 		return f"<a href='{href}'>{matchobj.group(1)}</a>"
 
+	@staticmethod
+	def regex_img_to_html(matchobj):
+		""" regex replacement function for ![[]] internal image links -> mysite.com/single-slug
+			todo: accept clean ( .png | .jpg ||)
+		"""
+		return f"""<img class="img-fluid" src='static/imgs/{matchobj.group(1)}'>"""
 
-# link img
-def int_img_repl(matchobj):
-	""" regex replacement function for ![[]] internal image links -> mysite.com/single-slug
-		todo: accept clean ( .png | .jpg ||)
-	"""
-	return f"""<img class="img-fluid" src='static/imgs/{matchobj.group(1)}'>"""
+	@staticmethod
+	def regex_append_subheader_attr_list(matchobj):
+		""" """
+		slugged = matchobj.group(2).strip().replace('_', '-').replace(' ', '-').lower()
+		attr_list = '{: ' + f'id="{slugged}"' + ' }'
 
-# tag
-def int_tag_repl(matchobj):
-	""" regex #tags out to distinguish vs
-		# space means md header1
-		-> \\#tag
-	"""
-	return f"{matchobj.group(1)}\\#{matchobj.group(2)}"
+		return f'{matchobj.group(1)}{matchobj.group(2)} {attr_list}'
 
-# code
-def md_mermaid_repl(matchobj):
-	""" required "scripts" in blog/static/layout.html 
-	"""
-	return f'<div class="mermaid">{matchobj.group(1)}</div>'
+	@staticmethod
+	def str_strip_name(matchobj):
+		""" """
+		return f'[[{matchobj.group(1).strip()}]]'
 
-# url
-def md_nakedhref_repl(matchobj):
-	""" regex replacement function for e.g. http://www.blahblahblah.com -> 
-		[http://www.blahblahblah.com](http://www.blahblahblah.com)
-		markdown syntax so that on md -> html, these links are 
-		then rendered clickable on md.markdown()
-	"""
-	return f"{matchobj.group(1)}[{matchobj.group(2)}]({matchobj.group(2)})"
+	@staticmethod
+	def add_link_mention(matchobj):
+		""" """
+		return f'{matchobj.group(1)}[[{matchobj.group(2)}]]{matchobj.group(3)}'
 
-# tag (fixing...)
-def comment_unescape(matchobj):
-	""" where tags are escaped by int_tag_repl,
-		regex \#comment -> #comment
-		within html code blocks
-	"""
-	_code = matchobj.group(2).replace('\#', '#')
+	@staticmethod
+	def remove_link_mention(matchobj):
+		""" """
+		return matchobj.group(2)
 
-	return f'<code class="{matchobj.group(1)}">{_code}</code>'
 
-# ...
-def add_header_attr_list(matchobj):
+
+class Tag(namedtuple('Tag', ['tag'])):
 	""" """
-	slugged = matchobj.group(2).strip().replace('_', '-').replace(' ', '-').lower()
-	attr_list = '{: ' + f'id="{slugged}"' + ' }'
+	def __eq__(self, b):
+		""" """
+		if isinstance(b, str):
+			if b == str(self):
+				return True
+			elif b == self.note:
+				return True
 
-	return f'{matchobj.group(1)}{matchobj.group(2)} {attr_list}'
+		return super().__eq__(self, b)
 
-
-""" cleanup re.sub str replacement functions
-"""
-# link
-def str_strip_link(matchobj):
-	""" """
-	return f'[[{matchobj.group(1).strip()}]]'
-
-def add_link_mention(matchobj):
-	""" """
-	return f'{matchobj.group(1)}[[{matchobj.group(2)}]]{matchobj.group(3)}'
-
-def remove_link_mention(matchobj):
-	""" """
-	return matchobj.group(2)
-
-
-""" tasks re.sub str replacement functions
-"""
-# task
-def md_task_uncheck(matchobj):
-	""" """
-	t = matchobj.group(3).strip().replace(r'\t', ' ')
-
-	if matchobj.group(1) == '\t':
-		return f'\t- [ ] {t}'
-
-	return f'- [ ] {t}'
-
-# task 
-def md_reoccurring_task_uncheck(matchobj):
-	""" """
-	return f'- [ ] {t}'
+	@staticmethod
+	def regex_to_html(matchobj):
+		""" regex #tags out to distinguish vs
+			# space means md header1
+			-> \\#tag
+		"""
+		return f"{matchobj.group(1)}\\#{matchobj.group(2)}"
 
 
 
-""" blog api connection helpers
-""" 
-def _convert_datetime(dt: str):
-	""" 
-	:param dt: fastapi datetime object e.g. 
-		'2021-05-13T11:22:10.373376' or
-		'2019-12-15T15:32:34'
-
-	:returns: 2019-12-15 15:32:34
+class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 	"""
-	if dt == 'now':
-		return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+	"""
+	@staticmethod
+	def regex_mermaid_to_html(matchobj):
+		""" required "scripts" in blog/static/layout.html 
+		"""
+		return f'<div class="mermaid">{matchobj.group(1)}</div>'
 
-	try:
-		return datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f')
-	except ValueError:
-		try:
-			return datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
-		except:
-			raise Exception(f'Something went wrong with the format parsing of {dt}')
+	@staticmethod
+	def regex_unescape_comments(matchobj):
+		""" where tags are escaped by int_tag_repl,
+			regex \#comment -> #comment
+			within html code blocks
+		"""
+		_code = matchobj.group(2).replace('\#', '#')
+
+		return f'<code class="{matchobj.group(1)}">{_code}</code>'
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -3,7 +3,7 @@ import re
 import datetime
 from collections import namedtuple, defaultdict
 
-from .helpers import Link, Url, remove_link_mention
+from .helpers import Link, Url
 
 
 
@@ -220,7 +220,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 				for m in ml:
 					print(f'[[{m[1]}]] --> ', m[1])
 
-			ns = p.sub(remove_link_mention, ns)
+			ns = p.sub(Link.remove_link_mention, ns)
 
 		self.md_out = ns
 
@@ -355,6 +355,8 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 			cont = f'\n\n--- \n{d_today}\n\n'
 			self.prepend_section(cont)
 			self.save(nb)
+
+
 
 
 

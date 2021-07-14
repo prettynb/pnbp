@@ -11,8 +11,7 @@ import markdown as md
 import requests
 
 from .note import Note
-from .helpers import (Link, int_img_repl, int_tag_repl, # int_link_repl,
-						md_mermaid_repl, md_nakedhref_repl, comment_unescape,
+from .helpers import (Link, Url, CodeBlock, Tag, # int_link_repl,
 						_convert_datetime, add_header_attr_list)
 
 
@@ -283,7 +282,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(self.MDS_IMG_LNK)
-		return p.sub(int_img_repl, note)
+		return p.sub(Lin, note)
 
 	def replace_intlinks(self, note):
 		""" a regex replace mtd 
@@ -299,7 +298,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(self.MDS_INT_TAG)
-		return p.sub(int_tag_repl, note)
+		return p.sub(Tag.regex_to_html, note)
 
 	def replace_mermaid(self, note):
 		""" a regex replace mtd 
@@ -307,7 +306,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(self.MD_MERMAID)
-		return p.sub(md_mermaid_repl, note)
+		return p.sub(CodeBlock.regex_mermaid_to_html, note)
 
 	def replace_nakedhref(self, note):
 		""" a regex replace mtd 
@@ -315,7 +314,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(self.HTTP_NAKED_LNK)
-		return p.sub(md_nakedhref_repl, note)
+		return p.sub(Url.regex_nakedhref_to_md, note)
 
 	def fix_blocked_comments(self, note):
 		""" a regex replace mtd 
@@ -323,7 +322,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')
-		return p.sub(comment_unescape, note)
+		return p.sub(CodeBlock.regex_unescape_comments, note)
 
 	def remove_nonpub_links(self, note):
 		""" if #public note with [[not public]] links,
@@ -351,7 +350,7 @@ class Notebook:
 		"""
 		p = re.compile(r'(#{1,6}\s)(.*)')
 
-		return p.sub(add_header_attr_list, note)
+		return p.sub(Link.regex_append_subheader_attr_list, note)
 
 	def replace_strikethrough(self, note):
 		""" ... 

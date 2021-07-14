@@ -5,12 +5,11 @@ import re
 
 import click 
 
-from pnbp.wrappers import pass_nb, arrow_call
+from pnbp.wrappers import pass_nb
 from pnbp.helpers import _convert_datetime
 
 
 
-@arrow_call
 @pass_nb
 def _git_commit_notebook(nb=None):
 	""" commit to local git -> nb/.git/

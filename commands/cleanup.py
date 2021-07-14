@@ -1,8 +1,8 @@
 import re
 
 from pnbp.models import Note
-from pnbp.wrappers import arrow_call, pass_nb
-from pnbp.helpers import str_strip_link, add_link_mention
+from pnbp.wrappers import pass_nb
+from pnbp.helpers import Link
 
 
 """
@@ -14,8 +14,8 @@ def _fix_link_spacing(note:Note, nb=None):
 	n = note
 	p = re.compile(nb.MDS_INT_LNK)
 
-	n.md_out = p.sub(str_strip_link, n.md)
-	n.save(nb)		
+	n.md_out = p.sub(Link.str_strip_name, n.md)
+	n.save(nb)
 
 
 @pass_nb
@@ -59,7 +59,7 @@ def _link_unlinked_mentions(note:Note, nb=None):
 		if (ml := p.findall(ns)):
 			for m in ml:
 				print(m[1], f'--> [[{m[1]}]]')
-		ns = p.sub(add_link_mention, ns)
+		ns = p.sub(Link.add_link_mention, ns)
 
 	n.md_out = ns
 	n.prime_md_out_release(nb) # saved in-line
