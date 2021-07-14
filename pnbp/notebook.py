@@ -260,26 +260,36 @@ class Notebook:
 	""" preparing for api commits : 
 	"""
 	@classmethod
-	def replace_strikethrough(cls, note_md):
+	def replace_strikethrough(cls, note):
 		""" a regex replace mtd 
 		
-		:param note: the .md content of an Note
+		:param note: an Note instance
 		"""
 		p = re.compile(r'(~~)(.*)(~~)')
 		strike_repl = lambda m: f'<s>{m.group(2)}</s>'
 
-		return p.sub(strike_repl, note_md)
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(strike_repl, note.md_out)
+
+		return note
 
 	@classmethod
-	def replace_eqhighlight(cls, note_md):
+	def replace_eqhighlight(cls, note):
 		""" a regex replace mtd 
 		
-		:param note_md: the .md content of an Note
+		:param note: an Note instance
 		"""
 		p = re.compile(r'(==)(.*)(==)')
 		eqhl_repl = lambda m: f'<mark>{m.group(2)}</mark>'
 
-		return p.sub(eqhl_repl, note_md)
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(eqhl_repl, note.md_out)
+
+		return note
 
 	def remove_nonpub_links(self, note):
 		""" if #public note with [[not public]] links,
@@ -296,16 +306,23 @@ class Notebook:
 				remv.append(name)
 
 		note.remove_links(remv)
+		# -> md_out is set initially here. 
 
-		return note.md_out
+		return note
 
-	def hide_commit_tag(self, note_md):
+	def hide_commit_tag(self, note):
 		""" removes the #public tag (aka COMMIT_TAG) from
 			the .md before export (if PUB_LNK_ONLY)
 
-		:param note: the .md of an Note
+		:param note: an Note instance
 		"""
-		return note_md.replace(self.COMMIT_TAG, '')
+		if not note.md_out:
+			# -> if md_out is not set yet...
+			note.md_out = note.md
+
+		note.md_out.replace(self.COMMIT_TAG, '')
+
+		return note
 
 	def convert_to_html(self, note):
 		""" apply all the regex method changes to 
@@ -318,13 +335,13 @@ class Notebook:
 		"""
 		if self.PUB_LNK_ONLY:
 			note = self.remove_nonpub_links(note)
-		else:
-			note = note.md
+		# else:
+		# 	note = note.md
 
 		if self.config.get('HIDE_COMMIT_TAG') == True:
 			note = self.hide_commit_tag(note)
 
-		nout = Link.replace_imglinks(note)
+		nout = Link.replace_imglinks(note) # ! getting note
 		nout = Link.replace_intlinks(nout)
 		nout = Tag.replace_smdtags(nout)
 		nout = CodeBlock.replace_mermaid(nout)
@@ -332,7 +349,7 @@ class Notebook:
 
 		nout = Link.add_header_ids(nout)
 
-		nout = md.markdown(nout, extensions=['fenced_code',	'nl2br', 'markdown.extensions.tables', 'attr_list', 'footnotes'], use_pygments=True)
+		nout.md_out = md.markdown(nout.md_out, extensions=['fenced_code',	'nl2br', 'markdown.extensions.tables', 'attr_list', 'footnotes'], use_pygments=True)
 
 		nout = CodeBlock.fix_blocked_comments(nout)
 		nout = Notebook.replace_strikethrough(nout)
@@ -353,7 +370,7 @@ class Notebook:
 			if n.is_tagged(self.COMMIT_TAG) and not n.is_tagged(self.EXCLUDE_TAG):
 				nout = self.convert_to_html(note=n)
 				of = open(os.path.join(self.HTML_PATH, f"{n.slugname}.html"), 'w')
-				of.write(nout)
+				of.write(nout.md_out)
 				of.close()
 
 				print(f'\t{n.name} ---> {self.HTML_PATH}')
@@ -475,13 +492,13 @@ class Notebook:
 			if to_post and not stage_only:
 				nout = self.convert_to_html(note=n)
 				r = requests.post(f'{self.API_BASE}/api/publishment',
-					json={"name": n.slugname, "content": nout},
+					json={"name": n.slugname, "content": nout.md_out},
 					headers=h
 					)
 				
 				print(f'\t{n.name} -> {r}')
 
-				for img in re.findall(self.MDS_IMG_LNK, n.md):
+				for img in re.findall(Link.MDS_IMG_LNK, n.md):
 					if not img in pub_img_names:
 						try:
 							f = open(os.path.join(self.IMG_PATH, img), 'rb')

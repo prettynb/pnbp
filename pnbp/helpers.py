@@ -113,15 +113,82 @@ class Link(namedtuple('Link', ['link'])):
 
 		return self.link
 
+	@property
+	def slugname(self):
+		""" My Note Name -> my-note-name
+		"""
+		_name = self.link
+		_sub = None
+
+		if self.subheader or self.label:
+			_name = self.note
+
+			if self.subheader:
+				_sub = '#' + self.subheader
+
+		_name = re.sub(r'[^a-zA-Z1-9\s_-]+', '', _name)
+
+		if _sub:
+			_name = _name + _sub
+
+		_name = _name.lower().replace(' ', '-').replace('_', '-')
+		slugname = "-".join([w for w in _name.split('-') if w])
+
+		return slugname
+
 	@staticmethod
 	def regex_to_html(matchobj):
 		""" regex replacement function for [[]] internal wiki links -> mysite.com/single-slug
 		"""
+		link = Link(matchobj.group(1))
+		# href = link.slugname
+
+		if link.subheader:
+			href = link.slugname
+			val = link.link
+
+			if not href.startswith('#'):
+				href = f'/{href}'
+			else:
+				if len([v for v in val.split('#') if v]) == 1:
+					val = link.name + val
+
+			val = val.replace("#", " > ")
+			# replmt =  f"<a href='{href}'>{val}</a>"
+
+		elif link.label:
+
+			val = link.label
+
+			return f"<a href='{link.slugname}'>{link.label}</a>"
+
+		else:
+			return f"<a href='{link.slugname}'>{link.note}</a>"
+
 		href = matchobj.group(1).strip().replace('_', '-').replace(' ', '-').lower()
+		val = matchobj.group(1)
 		if not href.startswith('#'):
 			href = f'/{href}'
+		else:
+			# val
+			pass
 
 		return f"<a href='{href}'>{matchobj.group(1)}</a>"
+
+	@classmethod
+	def replace_intlinks(cls, note):
+		""" a regex replace mtd 
+
+		:param note: an Note instance
+		"""
+		p = re.compile(cls.MDS_INT_LNK)
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(Link.regex_to_html, note.md_out)
+		
+		return note
 
 	@staticmethod
 	def regex_img_to_html(matchobj):
@@ -130,6 +197,21 @@ class Link(namedtuple('Link', ['link'])):
 		"""
 		return f"""<img class="img-fluid" src='static/imgs/{matchobj.group(1)}'>"""
 
+	@classmethod
+	def replace_imglinks(cls, note):
+		""" a regex replace mtd 
+
+		:param note: an Note instance
+		"""
+		p = re.compile(cls.MDS_IMG_LNK)
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(Link.regex_img_to_html, note.md_out)
+
+		return note
+
 	@staticmethod
 	def regex_append_subheader_attr_list(matchobj):
 		""" """
@@ -137,6 +219,22 @@ class Link(namedtuple('Link', ['link'])):
 		attr_list = '{: ' + f'id="{slugged}"' + ' }'
 
 		return f'{matchobj.group(1)}{matchobj.group(2)} {attr_list}'
+
+	@classmethod
+	def add_header_ids(cls, note):
+		""" providing access to sublink-ed via 
+			[[mynote#section2]] to html 
+
+		:param note: an Note instance
+		"""
+		p = re.compile(r'(#{1,6}\s)(.*)')
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(Link.regex_append_subheader_attr_list, note.md_out)
+
+		return note
 
 	@staticmethod
 	def str_strip_name(matchobj):
@@ -152,35 +250,6 @@ class Link(namedtuple('Link', ['link'])):
 	def remove_link_mention(matchobj):
 		""" """
 		return matchobj.group(2)
-
-	@classmethod
-	def replace_imglinks(cls, note_md):
-		""" a regex replace mtd 
-
-		:param note_md: the .md content of the Note
-		"""
-		p = re.compile(cls.MDS_IMG_LNK)
-		return p.sub(Link.regex_img_to_html, note_md)
-
-	@classmethod
-	def replace_intlinks(cls, note):
-		""" a regex replace mtd 
-
-		:param note: the .md content of the Note
-		"""
-		p = re.compile(cls.MDS_INT_LNK)
-		return p.sub(Link.regex_to_html, note)
-
-	@classmethod
-	def add_header_ids(cls, note_md):
-		""" providing access to sublink-ed via 
-			[[mynote#section2]] to html 
-
-		:param note_md: the .md content of the Note
-		"""
-		p = re.compile(r'(#{1,6}\s)(.*)')
-
-		return p.sub(Link.regex_append_subheader_attr_list, note_md)
 
 
 
@@ -210,13 +279,19 @@ class Tag(namedtuple('Tag', ['tag'])):
 		return f"{matchobj.group(1)}\\#{matchobj.group(2)}"
 
 	@classmethod
-	def replace_smdtags(cls, note_md):
+	def replace_smdtags(cls, note):
 		""" a regex replace mtd 
 
-		:param note_md: the .md content of an Note
+		:param note: an Note instance
 		"""
 		p = re.compile(cls.MDS_INT_TAG)
-		return p.sub(Tag.regex_to_html, note_md)
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(Tag.regex_to_html, note.md_out)
+
+		return note
 
 
 
@@ -302,19 +377,25 @@ class Url(namedtuple('Url', ['url', 'label'])):
 		return f"{matchobj.group(1)}[{matchobj.group(2)}]({matchobj.group(2)})"
 
 	@classmethod
-	def replace_nakedhref(self, note_md):
+	def replace_nakedhref(self, note):
 		""" a regex replace mtd 
 
-		:param note_md: the .md content of an Note
+		:param note: an Note instance
 		"""
 		p = re.compile(self.HTTP_NAKED_LNK)
-		return p.sub(Url.regex_nakedhref_to_md, note_md)
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(Url.regex_nakedhref_to_md, note.md_out)
+
+		return note
 
 	@classmethod
-	def adjust_externallinks(cls, note_md):
+	def adjust_externallinks(cls, note):
 		""" adding external link symbol, nofollow, and _blank target
 
-		:param note_md: the .md content of an Note
+		:param note: an Note instance
 		"""
 		_ext_icon = '<i class="bi bi-box-arrow-up-right" style="font-size:10px;"></i>'
 		_add_attrs = 'rel="nofollow" target="_blank"'
@@ -322,7 +403,12 @@ class Url(namedtuple('Url', ['url', 'label'])):
 		p = re.compile(r'<a href="(.*)">(.*)</a>') # taking advantage of our repl internal linked href='' vs ""
 		extlnk_repl = lambda m: f'<a {_add_attrs} href="{m.group(1)}">{m.group(2)}</a> {_ext_icon}'
 
-		return p.sub(extlnk_repl, note_md)
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(extlnk_repl, note.md_out)
+
+		return note
 
 
 
@@ -340,6 +426,21 @@ class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 		"""
 		return f'<div class="mermaid">{matchobj.group(1)}</div>'
 
+	@classmethod
+	def replace_mermaid(cls, note):
+		""" a regex replace mtd 
+
+		:param note: an Note instance
+		"""
+		p = re.compile(cls.MD_MERMAID)
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(CodeBlock.regex_mermaid_to_html, note.md_out)
+
+		return note
+
 	@staticmethod
 	def regex_unescape_comments(matchobj):
 		""" where tags are escaped by int_tag_repl,
@@ -351,22 +452,19 @@ class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 		return f'<code class="{matchobj.group(1)}">{_code}</code>'
 
 	@classmethod
-	def replace_mermaid(cls, note_md):
+	def fix_blocked_comments(cls, note):
 		""" a regex replace mtd 
 
-		:param note_md: the .md content of an Note
-		"""
-		p = re.compile(cls.MD_MERMAID)
-		return p.sub(CodeBlock.regex_mermaid_to_html, note_md)
-
-	@classmethod
-	def fix_blocked_comments(cls, note_md):
-		""" a regex replace mtd 
-
-		:param note_md: the .md content of an Note
+		:param note: an Note instance
 		"""
 		p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')
-		return p.sub(CodeBlock.regex_unescape_comments, note_md)
+
+		if not note.md_out:
+			note.md_out = note.md
+		
+		note.md_out = p.sub(CodeBlock.regex_unescape_comments, note.md_out)
+
+		return note
 
 	
 
