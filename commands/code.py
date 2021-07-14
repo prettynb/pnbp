@@ -16,6 +16,7 @@ LANG_EXTS = {
 	'bash': 'sh',
 	'powershell': 'ps1',
 	'txt': 'txt',
+	'json': 'json'
 	}
 
 

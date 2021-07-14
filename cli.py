@@ -165,6 +165,7 @@ def create_all_commands():
 
 	create_command(comm._git_commit_notebook)
 	create_command(comm._init_git_ignore)
+	create_command(comm._collect_git_diff)
 
 	create_command(clea._fix_link_spacing)
 	create_command(clea._remove_leading_newline)

@@ -11,7 +11,7 @@ import markdown as md
 import requests
 
 from .note import Note
-from .helpers import (int_link_repl, int_img_repl, int_tag_repl,
+from .helpers import (Link, int_img_repl, int_tag_repl, # int_link_repl,
 						md_mermaid_repl, md_nakedhref_repl, comment_unescape,
 						_convert_datetime, add_header_attr_list)
 
@@ -216,6 +216,19 @@ class Notebook:
 				ts.append(t)
 
 		return sorted(list(set(ts)))
+
+	@property
+	def urls(self)->list:
+		"""
+		"""
+		us = []
+		for n in self.notes.values():
+			for u in n.urls:
+				us.append(u)
+
+		return sorted(us)
+
+
 	
 
 	def find(self, regex):
@@ -278,7 +291,7 @@ class Notebook:
 		:param note: the .md content of the Note
 		"""
 		p = re.compile(self.MDS_INT_LNK)
-		return p.sub(int_link_repl, note)
+		return p.sub(Link.regex_to_html, note)
 
 	def replace_smdtags(self, note):
 		""" a regex replace mtd 

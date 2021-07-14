@@ -218,6 +218,16 @@ def _collect_tasks_note(nb=None):
 
 """
 """
+@pass_nb
+def _move_sched_tasks_today(nb=None):
+	""" """
+	tasked = [n for n in nb.get_tagged('#tasks')]
+	for n in tasked:
+		for li in n.md.splitlines():
+			if '#sched' in li and li.strip().startswith('-'):
+				pass
+
+
 # @pass_nb
 def _parse_today_note(nb=None):
 	""" ... under development """

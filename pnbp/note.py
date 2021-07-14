@@ -3,7 +3,7 @@ import re
 import datetime
 from collections import namedtuple, defaultdict
 
-from .helpers import remove_link_mention
+from .helpers import Link, Url, remove_link_mention
 
 
 
@@ -41,8 +41,10 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 					all_tags.remove(tag)
 		
 		tags = list(set(all_tags)) # only legitimate #tag's remain
-		urls = list(set(urls)) # <- doing here so that duplicate urls don't create tags
-		links = list(set(links))
+		# urls = list(set(urls)) # <- doing here so that duplicate urls don't create tags
+		# links = list(set(links))
+		urls = [Url(u) for u in set(urls)]
+		links = [Link(l) for l in set(links)]
 
 		for cb in cblocks:
 			if not cb.split():
@@ -109,7 +111,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 		if re.match(r'\[\^\d+\]: ', self.sections[-1]):
 			return True
 		return None
-	
+
 
 	def save(self, nb):
 		""" save note to .md file on NOTE_PATH,
