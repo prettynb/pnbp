@@ -9,7 +9,7 @@ from .url import Url
 
 """ 
 """ 
-def _convert_datetime(dt: str):
+def _convert_datetime(dt: str, as_mtime=False, as_date=False, as_time=False):
 	""" mainly a helper function to convert from blog api,
 		also accepts dt="now" -> "2021-07-13 12:30:22"
 
@@ -19,7 +19,15 @@ def _convert_datetime(dt: str):
 
 	:returns: 2021-07-13 12:30:22
 	"""
+	if as_mtime:
+		return datetime.datetime.fromtimestamp(dt)
+
 	if dt == 'now':
+		if as_time:
+			return datetime.datetime.strftime(datetime.datetime.now(), '%H:%M:%S')
+		elif as_date:
+			return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+
 		return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
 
 	try:

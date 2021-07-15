@@ -1,9 +1,8 @@
 import os
 import re
-import datetime
 from collections import namedtuple, defaultdict
 
-from .helpers import Link, Url
+from .helpers import Link, Tag, Url, _convert_datetime
 
 
 
@@ -40,9 +39,9 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 				if tag in all_tags:
 					all_tags.remove(tag)
 		
-		tags = list(set(all_tags)) # only legitimate #tag's remain
+		# tags = list(set(all_tags)) # only legitimate #tag's remain
 		# urls = list(set(urls)) # <- doing here so that duplicate urls don't create tags
-
+		tags = [Tag(t) for t in set(all_tags)]
 		urls = [Url(u) for u in set(urls)]
 		links = [Link(l) for l in set(links)]
 
@@ -225,7 +224,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 	def md_out_to_html(self, nb):
 		""" 
 		"""
-		self.md_out = nb.convert_to_html(self)
+		nb.convert_to_html(self) # ...
 
 	def prime_md_out_protect(self):
 		""" Replace links, tags, urls, cblocks
@@ -344,7 +343,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 		""" 
 		"""
 		new_day = True
-		d_today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+		d_today = _convert_datetime("now", as_date=True)
 		for i,s in enumerate(self.sections):
 			if s.startswith(d_today):
 				new_day = False

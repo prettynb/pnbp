@@ -1,5 +1,6 @@
 import re
 from collections import namedtuple
+import platform
 
 
 
@@ -188,6 +189,20 @@ class Link(namedtuple('Link', ['link'])):
 				pass
 
 		return _subheader
+
+	@property
+	def subdirs(self):
+		""" """
+		if platform.system() == 'Windows':
+			fpp = '\\'
+		else:
+			fpp = '/'
+
+		if len((bydir := self.link.split(fpp))) > 1:
+			subdirs = bydir[:-1]
+			return subdirs
+
+		return []
 
 	@property
 	def note(self):

@@ -1,9 +1,7 @@
 import os
 import re
 import json
-import datetime
-from collections import defaultdict
-from getpass import getpass
+import getpass
 import difflib
 
 import markdown as md
@@ -89,7 +87,7 @@ class Notebook:
 		else:
 			self.EXCLUDE_TAG = '#private'
 
-		self.notes = defaultdict()
+		self.notes = {}
 		self.open_md()
 
 	def __len__(self):
@@ -114,7 +112,7 @@ class Notebook:
 				tags=[m[1] for m in re.findall(Tag.MDS_INT_TAG, fo)],
 				urls=Url.collect_urls(fo),
 				cblocks=re.findall(CodeBlock.MD_CODE, fo),
-				mtime=datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(self.NOTE_PATH, f)))
+				mtime=_convert_datetime(os.path.getmtime(os.path.join(self.NOTE_PATH, f)), as_mtime=True),
 				)
 
 			self.notes.update({fname: n})
@@ -129,6 +127,8 @@ class Notebook:
 		for f in os.listdir(self.NOTE_PATH):
 			if f.endswith('.md'):
 				self.open_note(f)
+			else:
+				print(f)
 
 		self.notes = dict(sorted(self.notes.items()))
 
@@ -332,16 +332,15 @@ class Notebook:
 			coupled with mtds from helpers.py
 
 		:param note: an Note instance
+		::
 		"""
 		if self.PUB_LNK_ONLY:
 			note = self.remove_nonpub_links(note)
-		# else:
-		# 	note = note.md
 
 		if self.config.get('HIDE_COMMIT_TAG') == True:
 			note = self.hide_commit_tag(note)
 
-		nout = Link.replace_imglinks(note) # ! getting note
+		nout = Link.replace_imglinks(note)
 		nout = Link.replace_intlinks(nout)
 		nout = Tag.replace_smdtags(nout)
 		nout = CodeBlock.replace_mermaid(nout)
@@ -385,7 +384,7 @@ class Notebook:
 		""" request method to replace the authenticated user's bearer token 
 		"""
 		u = input('Username: ')
-		p = getpass()
+		p = getpass.getpass()
 		h = self.get_headers()
 		h.update({'Content-Type': 'application/x-www-form-urlencoded'})
 		r = requests.post(f'{self.API_BASE}/api/token', data={'username': u, 'password': p}, headers=h)
@@ -568,8 +567,8 @@ class Notebook:
 		if not username:
 			username = input('username: ')
 
-		password_1 = getpass()
-		password_2 = getpass()
+		password_1 = getpass.getpass()
+		password_2 = getpass.getpass()
 		if not password_1 == password_2:
 			print('passwords do not match...')
 			self.create_api_user(username)
@@ -587,8 +586,8 @@ class Notebook:
 	def reset_api_password(self):
 		""" request method to update the authed user's API password 
 		"""
-		p_1 = getpass()
-		p_2 = getpass()		
+		p_1 = getpass.getpass()
+		p_2 = getpass.getpass()		
 		if not p_1 == p_1:
 			print('passwords do not match...')
 			self.reset_api_password()

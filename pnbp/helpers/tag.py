@@ -10,12 +10,21 @@ class Tag(namedtuple('Tag', ['tag'])):
 	"""
 	MDS_INT_TAG = r'([^\\)/>\'\w])#([A-Za-z]+)' 
 
+	def __repr__(self):
+		""" """
+		return f'Tag({self.tag})'
+
+	def __str__(self):
+		""" """
+		return self.tag
+
 	def __eq__(self, b):
 		""" """
 		if isinstance(b, str):
 			if b == str(self):
 				return True
-			elif b == self.note:
+			elif b == self.tag.strip('#'):
+				# may not be desired to match without (?), but
 				return True
 
 		return super().__eq__(self, b)
