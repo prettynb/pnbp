@@ -127,9 +127,7 @@ class Notebook:
 		for f in os.listdir(self.NOTE_PATH):
 			if f.endswith('.md'):
 				self.open_note(f)
-			else:
-				print(f)
-
+		
 		self.notes = dict(sorted(self.notes.items()))
 
 	def open(self):

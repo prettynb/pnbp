@@ -1,10 +1,24 @@
+import datetime
 from collections import namedtuple
 from functools import wraps
 
 
 
 class Helper:
-	"""
+	""" an extendable namedtuple
+		subclass that acts as though it's the string value
+		found on an instance at it's class named attr (e.g.
+			>>> # ... 
+			>>> h = Helper("foo")
+			>>> h.helper == "foo"
+			True
+			>>> h == "foo"
+			True
+			>>> h + " bar"
+			"foo bar"
+			>>> h # unaltered
+			Helper("foo")
+		)
 	"""
 	def __new__(cls, *args, **kwargs):
 		""" """
@@ -14,6 +28,9 @@ class Helper:
 		try:
 			val = args[0]
 		except IndexError:
+			# being called empty, (e.g. HelperSub() vs HelperSub("value"))
+			# don't care (?) -> 
+			# return the uncalled (e.g. HelperSub) class constructor
 			val = None
 
 		_cls = namedtuple(cls_name, [attr_name])
@@ -33,15 +50,21 @@ class Helper:
 		return _cls
 
 	def __repr__(self):
-		""" """
+		""" rather than returning namedtuple's repr of
+			Helper(helper="foo") -> Helper("foo")
+			to denote it's specific string-y actuality
+		"""
 		return f'{self.__class__.__name__}({self[0]})'
 
 	def __str__(self):
-		""" """
+		""" subscripting self (as tuple) directly to instance val, 
+			("foo",)-> "foo"
+		"""
 		return self[0]
 
 	def __eq__(self, b):
-		""" """
+		""" 
+		"""
 		if isinstance(b, str):
 			if b == str(self):
 				return True
@@ -64,8 +87,9 @@ class Helper:
 
 		return super().__eq__(b)
 
-	def __add__(self, b):
-		""" """
+	def __add__(self, b) -> str:
+		"""
+		"""
 		if isinstance(b, str):
 			return f'{str(self)}{b}'
 
@@ -73,13 +97,17 @@ class Helper:
 
 	@staticmethod
 	def prep_md_out(mtd):
-		""" a decorator 
+		""" a decorator that allows to call regex replacement mtds
+			against an Note (n) instance's current n.md_out and be assumed
+			that if empty (n.md_out = ""), (aka being the initial mtd call
+			to regex repl) that e.g. n.md_out = "" -> n.md_out = n.md initially;
+			aka ... not re.sub-ing against an empty string.
 
 			note: reference to "<class 'pnbp.note.Note'>":
 				to allow an effective isinstance(a, pnbp.note.Note)
 				without causing circular imports
 
-		:param mtd: an @classmethod that does regex 
+		:param mtd: an @classmethod that does regex replacement on an Note instance
 		"""
 		@wraps(mtd)
 		def inner(*args, **kwargs):
@@ -136,6 +164,39 @@ class Name(Helper):
 	@property
 	def astitle(self):
 		return self.name.title()
+
+
+
+""" 
+""" 
+def _convert_datetime(dt: str, as_mtime=False, as_date=False, as_time=False):
+	""" mainly a helper function to convert from blog api,
+		also accepts dt="now" -> "2021-07-13 12:30:22"
+
+	:param dt: fastapi datetime object e.g. 
+		'2021-05-13T11:22:10.373376' or
+		'2019-12-15T15:32:34'
+
+	:returns: 2021-07-13 12:30:22
+	"""
+	if as_mtime:
+		return datetime.datetime.fromtimestamp(dt)
+
+	if dt == 'now':
+		if as_time:
+			return datetime.datetime.strftime(datetime.datetime.now(), '%H:%M:%S')
+		elif as_date:
+			return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+
+		return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+	try:
+		return datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f')
+	except ValueError:
+		try:
+			return datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
+		except:
+			raise Exception(f'Something went wrong with the format parsing of {dt}')
 
 
 
