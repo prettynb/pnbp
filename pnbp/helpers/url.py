@@ -1,34 +1,37 @@
 import re
 from collections import namedtuple
 
+from .base import Helper # prep_md_out, 
+
 
 
 """
 """
-class Url(namedtuple('Url', ['url', 'label'])):
+# class Url(namedtuple('Url', ['url', 'label'])):
+class Url(Helper):
 	"""
 	"""
 	MD_EXT_LINK = r'\[([^]]+)\]\(([^)]+)\)'
 	HTTP_NAKED_LNK = r'([^\(])(https?://[^;,\s\]\*]+)'
 
-	def __new__(cls, url, label=None):
-		""" """
-		return super().__new__(cls, url, label)
+	# def __new__(cls, url, label=None):
+	# 	""" """
+	# 	return super().__new__(cls, url, label)
 
-	def __repr__(self):
-		""" """
-		return f'Url({self.url})'
+	# def __repr__(self):
+	# 	""" """
+	# 	return f'Url({self.url})'
 
-	def __str__(self):
-		""" """
-		return self.url
+	# def __str__(self):
+	# 	""" """
+		# return self.url
 
-	def __eq__(self, b):
-		""" """
-		if isinstance(b, str) == str(self):
-			return True
+	# def __eq__(self, b):
+	# 	""" """
+	# 	if isinstance(b, str) == str(self):
+	# 		return True
 
-		return super().__eq__(self, b)
+	# 	return super().__eq__(self, b)
 
 	@classmethod
 	def collect_urls(cls, note_md)->list:
@@ -60,21 +63,19 @@ class Url(namedtuple('Url', ['url', 'label'])):
 		return f"{matchobj.group(1)}[{matchobj.group(2)}]({matchobj.group(2)})"
 
 	@classmethod
+	@Helper.prep_md_out
 	def replace_nakedhref(self, note):
 		""" a regex replace mtd 
 
 		:param note: an Note instance
 		"""
 		p = re.compile(self.HTTP_NAKED_LNK)
-
-		if not note.md_out:
-			note.md_out = note.md
-		
 		note.md_out = p.sub(Url.regex_nakedhref_to_md, note.md_out)
 
 		return note
 
 	@classmethod
+	@Helper.prep_md_out
 	def adjust_externallinks(cls, note):
 		""" adding external link symbol, nofollow, and _blank target
 
@@ -86,9 +87,6 @@ class Url(namedtuple('Url', ['url', 'label'])):
 		p = re.compile(r'<a href="(.*)">(.*)</a>') # taking advantage of our repl internal linked href='' vs ""
 		extlnk_repl = lambda m: f'<a {_add_attrs} href="{m.group(1)}">{m.group(2)}</a> {_ext_icon}'
 
-		if not note.md_out:
-			note.md_out = note.md
-		
 		note.md_out = p.sub(extlnk_repl, note.md_out)
 
 		return note

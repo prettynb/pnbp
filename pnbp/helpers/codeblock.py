@@ -1,11 +1,14 @@
 import re
 from collections import namedtuple
 
+from .base import Helper #, prep_md_out
+
 
 
 """
 """
-class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
+# class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
+class CodeBlock(Helper):
 	"""
 	"""
 	MD_CODE = r'```([^`]*)```'
@@ -18,16 +21,13 @@ class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 		return f'<div class="mermaid">{matchobj.group(1)}</div>'
 
 	@classmethod
+	@Helper.prep_md_out
 	def replace_mermaid(cls, note):
 		""" a regex replace mtd 
 
 		:param note: an Note instance
 		"""
-		p = re.compile(cls.MD_MERMAID)
-
-		if not note.md_out:
-			note.md_out = note.md
-		
+		p = re.compile(cls.MD_MERMAID)		
 		note.md_out = p.sub(CodeBlock.regex_mermaid_to_html, note.md_out)
 
 		return note
@@ -43,16 +43,13 @@ class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 		return f'<code class="{matchobj.group(1)}">{_code}</code>'
 
 	@classmethod
+	@Helper.prep_md_out
 	def fix_blocked_comments(cls, note):
 		""" a regex replace mtd 
 
 		:param note: an Note instance
 		"""
-		p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')
-
-		if not note.md_out:
-			note.md_out = note.md
-		
+		p = re.compile(r'<code class="(.+)">((.|\n)*)</code>')		
 		note.md_out = p.sub(CodeBlock.regex_unescape_comments, note.md_out)
 
 		return note
