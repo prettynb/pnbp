@@ -1,37 +1,16 @@
 import re
-from collections import namedtuple
 
-from .base import Helper # prep_md_out, 
+from .base import Helper
 
 
 
 """
 """
-# class Url(namedtuple('Url', ['url', 'label'])):
 class Url(Helper):
 	"""
 	"""
 	MD_EXT_LINK = r'\[([^]]+)\]\(([^)]+)\)'
 	HTTP_NAKED_LNK = r'([^\(])(https?://[^;,\s\]\*]+)'
-
-	# def __new__(cls, url, label=None):
-	# 	""" """
-	# 	return super().__new__(cls, url, label)
-
-	# def __repr__(self):
-	# 	""" """
-	# 	return f'Url({self.url})'
-
-	# def __str__(self):
-	# 	""" """
-		# return self.url
-
-	# def __eq__(self, b):
-	# 	""" """
-	# 	if isinstance(b, str) == str(self):
-	# 		return True
-
-	# 	return super().__eq__(self, b)
 
 	@classmethod
 	def collect_urls(cls, note_md)->list:

@@ -1,53 +1,17 @@
 import re
-from collections import namedtuple
 import platform
 
-from .base import Helper #, prep_md_out
+from .base import Helper
 
 
 
 """ 
 """
-# class Link(namedtuple('Link', ['link'])):
 class Link(Helper):
 	"""
 	"""
 	MDS_INT_LNK = r'\[\[([^]]+)\]\]' 
 	MDS_IMG_LNK = r'!\[\[([^]]+)\]\]'
-
-	# def __repr__(self):
-	# 	""" """
-	# 	return f'Link({self.link})'
-
-	# def __str__(self):
-	# 	""" """
-	# 	return self.link
-
-	def __eq__(self, b):
-		""" """
-		res = super().__eq__(b)
-
-		if not res and b == self.note:
-			res = True
-
-		return res
-
-	# def __eq__(self, b):
-	# 	""" """
-	# 	if isinstance(b, str):
-	# 		if b == str(self):
-	# 			return True
-	# 		elif b == self.note:
-	# 			return True
-
-	# 	return super().__eq__(self, b)
-
-	def __add__(self, b):
-		""" """
-		if isinstance(b, str):
-			return f'{str(self)}{b}'
-
-		return super().__add__(self, b)
 	
 	@staticmethod
 	def regex_to_html(matchobj):

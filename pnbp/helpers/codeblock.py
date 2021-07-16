@@ -1,13 +1,11 @@
 import re
-from collections import namedtuple
 
-from .base import Helper #, prep_md_out
+from .base import Helper
 
 
 
 """
 """
-# class CodeBlock(namedtuple('CodeBlock', ['cblock'])):
 class CodeBlock(Helper):
 	"""
 	"""
