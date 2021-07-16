@@ -113,12 +113,9 @@ class Helper:
 		def inner(*args, **kwargs):
 			""" """
 			note = kwargs.get('note')
-			print(args, kwargs)
 
 			if not note:
 				for a in args:
-					print('a: ', a)
-					# if isinstance(a, Note):
 					if str(a.__class__) == "<class 'pnbp.note.Note'>":
 						note = a
 						break
