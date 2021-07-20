@@ -25,7 +25,13 @@ TASK_COMPLETE = r'(^|\s)(-\s\[x\]\s)(.*)'
 
 TASK_VARS = r'\((.+)\)'
 
+
+TASKS_TAG = '#tasks'
 COMPL_TAG = '#complete'
+# SCHED_TAG = '#schedule'
+
+COMPL_NOTE = '_complete'
+# TASKS_NOTE = 'tasks'
 
 
 """
@@ -50,10 +56,12 @@ def record_complete_tasks(c_tasks:list=[], nb: Notebook=None):
 	""" called by other tasks fnxs (not a command)
 		initialize nb/_complete.md -> 
 		record c_tasks at YYYY-MM-DD section 
+
 	:param list c_tasks: complete tasks e.g. ['- [x] clean room', '- [x] laundry', '- [x] some fake task']
+	:param nb: explicitely expecting a notebook instance 
 	"""
-	if not nb.get('_complete'):
-		nb.generate_note('_complete', "")
+	if not nb.get(COMPL_NOTE):
+		nb.generate_note(COMPL_NOTE, "")
 
 	if c_tasks:
 		fin_item_str = '\n'.join(c_tasks)
@@ -61,21 +69,21 @@ def record_complete_tasks(c_tasks:list=[], nb: Notebook=None):
 	new_day = True
 	d_today = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
 	repl_section = ''
-	for i, s in enumerate(nb.notes['_complete'].sections):
+	for i, s in enumerate(nb.notes[COMPL_NOTE].sections):
 		if re.match(d_today, s):
 			repl_section = s + '\n' + fin_item_str
-			_md_out = nb.notes['_complete'].sections.copy()
+			_md_out = nb.notes[COMPL_NOTE].sections.copy()
 			_md_out[i] = repl_section
 
-			nb.notes['_complete'].md_out = '\n\n--- \n'.join(_md_out)
-			nb.notes['_complete'].save(nb)
+			nb.notes[COMPL_NOTE].md_out = '\n\n--- \n'.join(_md_out)
+			nb.notes[COMPL_NOTE].save(nb)
 			new_day = False
 
 	if new_day:
-		_md_out = nb.notes['_complete'].sections.copy()
+		_md_out = nb.notes[COMPL_NOTE].sections.copy()
 		_md_out.insert(1, f'{d_today}\n{fin_item_str}')
-		nb.notes['_complete'].md_out = '\n\n--- \n'.join(_md_out)
-		nb.notes['_complete'].save(nb)
+		nb.notes[COMPL_NOTE].md_out = '\n\n--- \n'.join(_md_out)
+		nb.notes[COMPL_NOTE].save(nb)
 
 
 @pass_nb
@@ -213,7 +221,7 @@ def _nb_task_settle(nb=None):
 		(2) ^^ for - [x] standard tasks
 		(3) ^^ and remove - bullet-only todos marked #complete
 	"""
-	tasked = [n for n in nb.get_tagged('#tasks')]
+	tasked = [n for n in nb.get_tagged(TASKS_TAG)]
 	print([n.name for n in tasked])
 
 	for n in tasked:
@@ -227,7 +235,7 @@ def _collect_tasks_note(nb=None):
 	""" if #tasks -> [[tasks]]
 		(link all notes containg "#tasks" to nb/tasks.md)
 	"""
-	tasked = [n for n in nb.get_tagged('#tasks')]
+	tasked = [n for n in nb.get_tagged(TASKS_TAG)]
 	ns = '\n'.join([f'[[{n.name}]]' for n in tasked])
 	nb.generate_note('tasks', md_out=ns, overwrite=True)
 
@@ -238,7 +246,7 @@ def _collect_tasks_note(nb=None):
 @pass_nb
 def _move_sched_tasks_today(nb=None):
 	""" """
-	tasked = [n for n in nb.get_tagged('#tasks')]
+	tasked = [n for n in nb.get_tagged(TASKS_TAG)]
 	for n in tasked:
 		for li in n.md.splitlines():
 			if '#sched' in li and li.strip().startswith('-'):

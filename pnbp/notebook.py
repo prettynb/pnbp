@@ -159,6 +159,10 @@ class Notebook:
 			n = name
 			return self.notes.get(n.name)
 
+		name = str(name)
+
+		print(name, type(name))
+
 		name = name.replace('.md', '').replace('.html', '').replace('\\', '')
 
 		if (note := self.notes.get(name)):

@@ -164,7 +164,7 @@ def _collect_all_tags(nb=None):
 	"""
 	ns = []
 	
-	ns.append(', '.join([t for t in nb.tags]))
+	ns.append(', '.join([t.tag for t in nb.tags]))
 	
 	ns.append('\n--- ')
 

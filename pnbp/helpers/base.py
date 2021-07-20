@@ -65,25 +65,30 @@ class Helper:
 	def __eq__(self, b):
 		""" 
 		"""
-		if isinstance(b, str):
-			if b == str(self):
+		if not isinstance(b, str):
+			b = str(b)
+
+		if b == str(self):
+			return True
+
+		if self.__class__.__name__ == 'Tag':
+			if b == self.tag.strip('#'):
+				# may not be desired to match without (?), but
+				return True					
+				
+		elif self.__class__.__name__ == 'Link':
+			if b == self.note:
+				# ...
 				return True
 
-			if self.__class__.__name__ == 'Tag':
-				if b == self.tag.strip('#'):
-					# may not be desired to match without (?), but
-					return True					
+		elif self.__class__.__name__ == 'Name':
+			if b == self.asupper or b == self.astitle:
+				return True
 
-			elif self.__class__.__name__ == 'Link':
-				if b == self.note:
-					# ...
-					return True
+		return False
 
-			elif self.__class__.__name__ == 'Name':
-				if b == self.asupper or b == self.astitle:
-					return True
-
-			return False
+		print(b, type(b))
+		print(b.__class__.__name__)
 
 		return super().__eq__(b)
 
