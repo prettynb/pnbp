@@ -41,21 +41,22 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'codeblock
 				if tag in all_tags:
 					all_tags.remove(tag)
 		
+		if (m := re.match(r'^#([A-Za-z]+)', md)):
+			# catch a #tag at the very beginning of the md string
+			# without opening pandoras box
+			all_tags.append(f'#{m.groups(1)[0]}')
 
 		tags = [Tag(t) for t in set(all_tags)]
 		urls = [Url(u) for u in set(urls)]
 		links = [Link(l) for l in set(links)]
 
-		# for i, cb in enumerate(codeblocks):
-		# 	if not cb.split():
-		# 		# "if *essentially* empty" ... 
-		# 		# handling for IndexError 
-		# 		# when '\n\n'.split() -> []
-		# 		# and looking for language name at codeblocks[0]
-		# 		codeblocks.remove(cb)
-		# 	else:
-		# 		codeblocks[i] = CodeBlock(cb)
 		codeblocks = [CodeBlock(cb) for cb in codeblocks if cb.split()]
+
+		if "#pnbp" in tags:
+			tags = [Tag("#pnbp")]
+			urls = []
+			links = []
+			codeblocks = []
 
 		return super().__new__(cls, name, md, links, tags, urls, codeblocks, mtime)
 
@@ -76,10 +77,15 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'codeblock
 	def slugname(self):
 		""" My Note Name -> my-note-name
 		"""
-		_name = re.sub(r'[^a-zA-Z1-9\s_-]+', '', self.name)
-		_name = _name.lower().replace(' ', '-').replace('_', '-')
-		slugname = "-".join([w for w in _name.split('-') if w])
-		return slugname
+		_name = Link(self.name)
+		return _name.slugname
+
+	@property
+	def linkname(self):
+		""" self.name -> [[self.name]]
+		"""
+		_name = Link(self.name)
+		return _name.aslink
 
 	@property
 	def sections(self)->list:
@@ -89,9 +95,16 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'codeblock
 	@property
 	def header(self):
 		""" """
+		NOTE_HEADER = os.environ.get('NOTE_HEADER')
+
+		if not NOTE_HEADER:
+			NOTE_HEADER = r'^Links'
+		else:
+			NOTE_HEADER = fr'{NOTE_HEADER}'
+
 		try:
 			for i in (0, 1):
-				if re.match(r'^Links', self.sections[i]):
+				if re.match(NOTE_HEADER, self.sections[i]):
 					return self.sections[i]
 
 		except IndexError:

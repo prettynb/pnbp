@@ -59,7 +59,7 @@ def _collect_subl_projs(nb=None):
 
 	nmd = "\n\n".join([f'![[{p}]]' for p in projs])
 
-	nb.generate_note('sublime-project', nmd, overwrite=True)
+	nb.generate_note('sublime-project', nmd, overwrite=True, pnbp=True)
 
 
 

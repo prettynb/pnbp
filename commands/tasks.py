@@ -23,16 +23,7 @@ from pnbp.wrappers import pass_nb
 TASK_INCOMPLETE = r'(^|\s)(-\s\[\s\]\s)(.*)'
 TASK_COMPLETE = r'(^|\s)(-\s\[x\]\s)(.*)'
 
-TASK_VARS = r'\((.+)\)'
-
-
-TASKS_TAG = '#tasks'
-COMPL_TAG = '#complete'
-# SCHED_TAG = '#schedule'
-
-COMPL_NOTE = '_complete'
-# TASKS_NOTE = 'tasks'
-
+TASK_VARS = r'\((.+:+.+)\)'
 
 """
 """
@@ -60,6 +51,11 @@ def record_complete_tasks(c_tasks:list=[], nb: Notebook=None):
 	:param list c_tasks: complete tasks e.g. ['- [x] clean room', '- [x] laundry', '- [x] some fake task']
 	:param nb: explicitely expecting a notebook instance 
 	"""
+	COMPL_NOTE = nb.config.get('COMPL_NOTE')
+
+	if not COMPL_NOTE:
+		COMPL_NOTE = '_complete'
+
 	if not nb.get(COMPL_NOTE):
 		nb.generate_note(COMPL_NOTE, "")
 
@@ -113,6 +109,11 @@ def _complete_complete_tasks(note: Note=None, nb=None):
 	""" - todo #complete -> ... (remove line)
 		 (&& -> nb/_complete.md)
 	"""
+	COMPL_TAG = nb.config.get('COMPL_TAG')
+
+	if not COMPL_TAG:
+		COMPL_TAG = '#complete'
+
 	ns = note.md.splitlines()
 
 	p = re.compile(COMPL_TAG)
@@ -221,6 +222,11 @@ def _nb_task_settle(nb=None):
 		(2) ^^ for - [x] standard tasks
 		(3) ^^ and remove - bullet-only todos marked #complete
 	"""
+	TASKS_TAG = nb.config.get('TASKS_TAG')
+
+	if not TASKS_TAG:
+		TASKS_TAG = '#tasks'
+
 	tasked = [n for n in nb.get_tagged(TASKS_TAG)]
 	print([n.name for n in tasked])
 
@@ -235,9 +241,18 @@ def _collect_tasks_note(nb=None):
 	""" if #tasks -> [[tasks]]
 		(link all notes containg "#tasks" to nb/tasks.md)
 	"""
+	TASKS_TAG = nb.config.get('TASKS_TAG')
+	TASKS_NOTE = nb.config.get('TASKS_NOTE')
+
+	if not TASKS_TAG:
+		TASKS_TAG = '#tasks'
+	if not TASKS_NOTE:
+		TASKS_NOTE = 'tasks'
+
 	tasked = [n for n in nb.get_tagged(TASKS_TAG)]
 	ns = '\n'.join([f'[[{n.name}]]' for n in tasked])
-	nb.generate_note('tasks', md_out=ns, overwrite=True)
+
+	nb.generate_note(TASKS_NOTE, md_out=ns, overwrite=True, pnbp=True)
 
 
 

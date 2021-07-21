@@ -45,7 +45,7 @@ def _collect_code_blocked(nb=None):
 				# if there's extension-ed code in the file:
 				ns += f'[[{n.name}]]\n'
 
-	nb.generate_note('all code blocked', ns, overwrite=True)
+	nb.generate_note('all code blocked', ns, overwrite=True, pnbp=True)
 
 
 

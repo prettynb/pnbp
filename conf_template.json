@@ -25,5 +25,7 @@
 	"hljs_dark": "xt256",
 	"merm_light": "default",
 	"merm_dark": "dark",
+	"COMMIT_TAG": "#public",
+	"EXCLUDE_TAG": "#private",
 	"HIDE_COMMIT_TAG": false
 }

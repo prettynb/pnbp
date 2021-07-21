@@ -64,6 +64,7 @@ def _collect_public_graph(nb=None):
 	_create_tag_graph('public', nb)
 
 
+
 @pass_nb
 def _create_link_graph(note: Note, nb=None):
 	""" --note	-> nb/graph-{note}.md 

@@ -89,7 +89,7 @@ def _collect_unlinked_mentions(nb=None):
 		n.pprotect = {}
 		# ^^ not saving, just looking
 
-	nb.generate_note('all unlinked mentions', ns, overwrite=True)
+	nb.generate_note('all unlinked mentions', ns, overwrite=True, pnbp=True)
 
 
 
@@ -130,7 +130,7 @@ def _collect_nonexistant_links(nb=None):
 				ns += f'{ol}, '
 			ns += '\n'
 
-	nb.generate_note('all nonexistant links', ns, overwrite=True)
+	nb.generate_note('all nonexistant links', ns, overwrite=True, pnbp=True)
 
 
 

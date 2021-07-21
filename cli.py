@@ -86,6 +86,15 @@ def nb_commit_stage():
 	nb.post_commits_to_blog_api(stage_only=True)
 
 
+@cli.command()
+def nb_commit_settings():
+	""" *only* print nb-commit- changes against nb.API_BASE
+		to the terminal (staging view)
+	"""
+	nb = Notebook()
+	nb.blog_settings_post()
+
+
 
 
 """ building click.commands out of 
@@ -165,13 +174,14 @@ def create_all_commands():
 
 	create_command(comm._git_commit_notebook)
 	create_command(comm._init_git_ignore)
-	create_command(comm._collect_git_diff)
 
 	create_command(clea._fix_link_spacing)
 	create_command(clea._remove_leading_newline)
 	create_command(clea._add_leading_newline)
 	create_command(clea._link_unlinked_mentions)
 	create_command(clea._remove_nonexistant_links)
+	create_command(clea._collect_nonexistant_links)
+	create_command(clea._collect_unlinked_mentions)
 
 	create_command(subl._subl_init)
 

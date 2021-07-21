@@ -134,11 +134,12 @@ class Notebook:
 		""" """
 		self.open_md()
 
-	def generate_note(self, name, md_out, overwrite=False):
+	def generate_note(self, name, md_out, overwrite=False, pnbp=False):
 		""" 
 		:param name: the name of the note (without ".md") to generate
 		:param md_out: the desired string to save to the notebook at "name.md"
-		:param overwrite: 
+		:param overwrite: if overwrite=True, allow existing file to be re-written
+		:param pnbp: if pnbp=True, tagging #pnbp to track and ignore
 		"""
 		name = name.strip()
 
@@ -147,6 +148,10 @@ class Notebook:
  
 		n = Note(name=name, md='', links=[], tags=[], urls=[], codeblocks=[], mtime='')
 		n.md_out = md_out
+
+		if pnbp is True:
+			n.md_out += '\n\n--- \n\n#pnbp'
+
 		n.save(self) # ^^ although instantiated empty, live access to attrs on nb instance
 
 	def get(self, name)->Note:
@@ -160,8 +165,6 @@ class Notebook:
 			return self.notes.get(n.name)
 
 		name = str(name)
-
-		print(name, type(name))
 
 		name = name.replace('.md', '').replace('.html', '').replace('\\', '')
 
@@ -190,7 +193,7 @@ class Notebook:
 		"""
 		t_notes = []
 		for n in self.notes.values():
-			if n.is_tagged(tag) and not n.name == 'all tags': # janky
+			if n.is_tagged(tag):
 				t_notes.append(n)
 
 		return t_notes
