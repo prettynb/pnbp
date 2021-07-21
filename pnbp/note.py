@@ -2,32 +2,34 @@ import os
 import re
 from collections import namedtuple, defaultdict
 
-from .helpers import Link, Tag, Url, _convert_datetime
+from .helpers import Link, Tag, Url, CodeBlock, _convert_datetime
 
 
 
-class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks', 'mtime'])):
+class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'codeblocks', 'mtime'])):
 
-	def __new__(cls, name, md, links, tags, urls, cblocks, mtime):
+	def __new__(cls, name, md, links, tags, urls, codeblocks, mtime):
 		"""
 		:param str name: the filename stripped of .md
 		:param str md: the in mem note context read from file
 		:param list links: all regex found [[links]] 's in md
 		:param list tags: all regex found #tag 's in md
 		:param list urls: all regex found http/https links in md
-		:param list cblocks: all regex found ```backtick code blocks```
+		:param list codeblocks: all regex found ```backtick code blocks```
 		:param str mtime: the local md most recent modification date
 			-> used against remote blog api to determine if POST required
 		"""
 		all_tags = [f'#{t}' for t in tags]
 
+		# removing "#tags" found within Urls, 
+		# CodeBlocks, and Links :
 		_tags = list(set(all_tags.copy()))
 		_remove = defaultdict(int)
 		for t in _tags:
 			for u in urls:
 				if (num_occur := len(re.findall(t, u))):
 					_remove[t] += num_occur
-			for b in cblocks:
+			for b in codeblocks:
 				if (num_occur := len(re.findall(t, b))):
 					_remove[t] += num_occur
 			for l in links:
@@ -39,21 +41,23 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 				if tag in all_tags:
 					all_tags.remove(tag)
 		
-		# tags = list(set(all_tags)) # only legitimate #tag's remain
-		# urls = list(set(urls)) # <- doing here so that duplicate urls don't create tags
+
 		tags = [Tag(t) for t in set(all_tags)]
 		urls = [Url(u) for u in set(urls)]
 		links = [Link(l) for l in set(links)]
 
-		for cb in cblocks:
-			if not cb.split():
-				# "if *essentially* empty" ... 
-				# handling for IndexError 
-				# when '\n\n'.split() -> []
-				# and looking for language name at cblocks[0]
-				cblocks.remove(cb)
+		# for i, cb in enumerate(codeblocks):
+		# 	if not cb.split():
+		# 		# "if *essentially* empty" ... 
+		# 		# handling for IndexError 
+		# 		# when '\n\n'.split() -> []
+		# 		# and looking for language name at codeblocks[0]
+		# 		codeblocks.remove(cb)
+		# 	else:
+		# 		codeblocks[i] = CodeBlock(cb)
+		codeblocks = [CodeBlock(cb) for cb in codeblocks if cb.split()]
 
-		return super().__new__(cls, name, md, links, tags, urls, cblocks, mtime)
+		return super().__new__(cls, name, md, links, tags, urls, codeblocks, mtime)
 
 	def __init__(self, *args, **kwargs):
 		""" 
@@ -229,7 +233,7 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 		nb.convert_to_html(self) # ...
 
 	def prime_md_out_protect(self):
-		""" Replace links, tags, urls, cblocks
+		""" Replace links, tags, urls, codeblocks
 			w/ an _key, saving all actual .md item values at
 			self.pprotect[_key], and the repl'd skeleton .md 
 			content to self.md_out.
@@ -243,9 +247,9 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'cblocks',
 		ns = self.md 		
 		# pull out all code, links, tags, urls, 
 		# so that they don't get matched with 
-		for i, cb in enumerate(self.cblocks):
+		for i, cb in enumerate(self.codeblocks):
 			_repl = f'cb_{i}.'
-			ns = ns.replace(cb, _repl)
+			ns = ns.replace(cb.codeblock, _repl)
 			self.pprotect.update({_repl: cb})
 		for i, l in enumerate(self.links):
 			_repl = f'l_{i}.'

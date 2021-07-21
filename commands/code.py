@@ -27,8 +27,8 @@ def _collect_code_blocked(nb=None):
 	"""
 	ns = "\n\n--- \n\n"
 	for n in nb.notes.values():
-		if n.cblocks:
-			_c = n.cblocks.copy()
+		if n.codeblocks:
+			_c = [c.codeblock for c in n.codeblocks.copy()]
 
 			for cb in _c:
 				if not LANG_EXTS.get(cb.split()[0]):
@@ -67,8 +67,8 @@ def _extract_code_blocks(lang: str, note: Note, nb=None):
 				break
 
 	cs = []
-	for cb in n.cblocks:
-		if cb.startswith(lang):
+	for cb in n.codeblocks:
+		if cb.codeblock.startswith(lang):
 			cont = cb.lstrip(lang).lstrip('\n')
 			cs.append(cont)
 
@@ -101,11 +101,11 @@ def _extract_all_codeblocks(note: Note, nb=None):
 
 	cs = defaultdict(list)
 
-	for cb in n.cblocks:
-		lang = cb.split()[0]
+	for cb in n.codeblocks:
+		lang = cb.codeblock.split()[0]
 		extn = LANG_EXTS.get(lang)
 		if extn:
-			cont = cb.lstrip(lang).lstrip('\n')
+			cont = cb.codeblock.lstrip(lang).lstrip('\n')
 			cs[extn].append(cont)
 
 	cpth = os.path.join(nb.NOTE_PATH, 'code')

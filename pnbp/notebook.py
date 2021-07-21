@@ -111,7 +111,7 @@ class Notebook:
 				links=[m.strip() for m in re.findall(Link.MDS_INT_LNK, fo)],
 				tags=[m[1] for m in re.findall(Tag.MDS_INT_TAG, fo)],
 				urls=Url.collect_urls(fo),
-				cblocks=re.findall(CodeBlock.MD_CODE, fo),
+				codeblocks=re.findall(CodeBlock.MD_CODE, fo),
 				mtime=_convert_datetime(os.path.getmtime(os.path.join(self.NOTE_PATH, f)), as_mtime=True),
 				)
 
@@ -145,7 +145,7 @@ class Notebook:
 		if name in self.notes.keys() and not overwrite:
 			raise FileExistsError(f"Cannot generate a new note with name {name}.")
  
-		n = Note(name=name, md='', links=[], tags=[], urls=[], cblocks=[], mtime='')
+		n = Note(name=name, md='', links=[], tags=[], urls=[], codeblocks=[], mtime='')
 		n.md_out = md_out
 		n.save(self) # ^^ although instantiated empty, live access to attrs on nb instance
 

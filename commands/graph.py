@@ -123,8 +123,8 @@ def _collect_all_graphs(nb=None):
 			glnks.update({f"[[{n.name}]]\n": _graph})
 
 		if not _graph:
-			for cb in n.cblocks:
-				if cb.startswith('mermaid'):
+			for cb in n.codeblocks:
+				if cb.codeblock.startswith('mermaid'):
 					glnks.update({f"[[{n.name}]]\n": _graph})
 
 	gs = [k for k,v in glnks.items() if not v]

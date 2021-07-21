@@ -85,7 +85,7 @@ class Helper:
 			if b == self.asupper or b == self.astitle:
 				return True
 
-		return super().__eq__(b)
+		return False
 
 	def __add__(self, b) -> str:
 		"""
