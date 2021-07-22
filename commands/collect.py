@@ -15,6 +15,7 @@ from .tasks import _collect_tasks_note
 from .graph import _collect_public_graph, _collect_all_graphs
 from .subl import _collect_subl_projs
 from .commit import _collect_git_diff
+from .cleanup import _collect_nonexistant_links
 
 
 """ commands writing collections to specific notebook files:

@@ -180,7 +180,6 @@ def create_all_commands():
 	create_command(clea._add_leading_newline)
 	create_command(clea._link_unlinked_mentions)
 	create_command(clea._remove_nonexistant_links)
-	create_command(clea._collect_nonexistant_links)
 	create_command(clea._collect_unlinked_mentions)
 
 	create_command(subl._subl_init)

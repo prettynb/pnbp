@@ -25,7 +25,8 @@ import click
 @pass_nb
 @click.option('--tag', help="The name of the #tag to be graphed. (#tag or tag)")
 def _create_tag_graph(tag: str, nb=None):
-	""" """
+	""" --tag -> nb/graph-tag-{tag}.md
+	"""
 	tag = tag.strip('#')
 
 	ll = [ch for ch in ascii_uppercase] # link letters
@@ -62,6 +63,9 @@ def _create_tag_graph(tag: str, nb=None):
 def _collect_public_graph(nb=None):
 	""" #public -> flat link graph notebook/graph-tag-public.md"""
 	_create_tag_graph('public', nb)
+	n = nb.get('graph-tag-public')
+	n.append_section('\n#pnbp')
+	n.save(nb)
 
 
 
