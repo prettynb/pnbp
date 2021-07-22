@@ -547,9 +547,8 @@ class Notebook:
 		_config = self.config.copy()
 
 		bs_keys = tuple([
-						"NAV_BRAND",
-						"NAV_PAGES", 
-						"FOOTER", 
+						"NAV_BRAND", "NAV_PAGES", 
+						"FOOTER", "TITLE",
 						"darkmode", 
 						"hljs_light", "hljs_dark", 
 						"merm_light", "merm_dark"

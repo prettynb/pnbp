@@ -5,7 +5,6 @@
 	"API_BASE": "http://127.0.0.1:8000",
 	"API_TOKEN": "fakeinitialvalue",
 	"PUB_LNK_ONLY": false,
-
 	"NAV_BRAND": "<i class='bi bi-book-fill'></i>&nbsp;<i class='bi bi-globe2'></i>",
 	"NAV_PAGES": {
 		"content": "/index/",
@@ -20,6 +19,7 @@
 		]
 	},
 	"FOOTER": "<small><p>&lt;p&gt;nb&lt;/p&gt;</p>| powered by <a href=\"https://www.python.org/\">Python</a>&nbsp;,&nbsp;<a href=\"https://fastapi.tiangolo.com/\">FastAPI</a>&nbsp;,&nbsp;<a href=\"https://getbootstrap.com/\">Bootstrap</a>&nbsp;,&nbsp;and&nbsp;</a><a href=\"https://obsidian.md/\">Obsidian</a>&nbsp;via&nbsp;<a href=\"https://daringfireball.net/projects/markdown/\">markdown</a>.</small>",
+	"TITLE": "Hello, world!",
 	"darkmode": false,
 	"hljs_light": "default",
 	"hljs_dark": "xt256",
@@ -27,5 +27,13 @@
 	"merm_dark": "dark",
 	"COMMIT_TAG": "#public",
 	"EXCLUDE_TAG": "#private",
-	"HIDE_COMMIT_TAG": false
+	"HIDE_COMMIT_TAG": false,
+	"MOC_TAG": "#moc",
+	"CONT_TAG": "#cont",
+	"TASKS_TAG": "#tasks",
+	"TASKS_NOTE": "tasks",
+	"COMPL_TAG": "#complete",
+	"COMPL_NOTE": "_complete",
+	"SCHED_TAG": "#schedule",
+	"TERMS_NOTE": "TERMS"
 }

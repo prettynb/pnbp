@@ -95,6 +95,22 @@ def nb_commit_settings():
 	nb.blog_settings_post()
 
 
+@cli.command()
+def nb_git_clone_pnbp_blog():
+	""" command to clone from github to a new blog/
+	"""
+	op = subprocess.run([
+		'git', 'clone',
+		'https://github.com/prettynb/pnbp-blog',
+		'blog'
+		],
+		capture_output=True)
+
+	if op.stdout:
+		click.echo(op.stdout)
+	else:
+		click.echo(op.stderr)
+
 
 
 """ building click.commands out of 
@@ -188,7 +204,7 @@ def create_all_commands():
 	create_command(graph._create_tag_graph)
 
 	create_command(code._extract_code_blocks)
-	create_command(code._extract_all_codeblocks)
+	create_command(code._extract_all_code_blocks)
 
 	create_command(pprint._nb_pprint)
 

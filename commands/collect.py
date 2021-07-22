@@ -104,10 +104,15 @@ def _touch_all_public(nb=None):
 def _collect_terms(nb=None):
 	""" if found [[TERMS]] -> nb/TERMS.md
 	"""
-	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_linked('TERMS')])
-	ns = "\nall [[TERMS]] :\n\n --- \n\n " + ns
+	TERMS_NOTE = nb.config.get('TERMS_NOTE')
 
-	nb.generate_note('TERMS', ns, overwrite=True, pnbp=True)
+	if not TERMS_NOTE:
+		TERMS_NOTE = 'TERMS'
+
+	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_linked(TERMS_NOTE)])
+	ns = f"\nall [[{TERMS_NOTE}]] :\n\n --- \n\n " + ns
+
+	nb.generate_note(TERMS_NOTE, ns, overwrite=True, pnbp=True)
 
 
 @pass_nb
@@ -161,8 +166,16 @@ def _collect_all_moc(nb=None):
 	""" "maps of content" via capitalization (e.g. [[PYTHON]]) 
 		-> nb/all MOC.md
 	"""
-	ns = [n for n in nb.notes.values() if not n.is_tagged('#cont')]
-	ns = [n for n in ns if n.is_tagged('#moc') or n.name.isupper()]
+	MOC_TAG = nb.config.get('MOC_TAG')
+	CONT_TAG = nb.config.get('CONT_TAG')
+
+	if not MOC_TAG:
+		MOC_TAG = '#moc'
+	if not CONT_TAG:
+		CONT_TAG = '#cont'
+
+	ns = [n for n in nb.notes.values() if not n.is_tagged(CONT_TAG)]
+	ns = [n for n in ns if n.is_tagged(MOC_TAG) or n.name.isupper()]
 	ns = "".join([f"[[{n.name}]]\n" for n in ns])
 	ns = "\nall MOC :\n\n --- \n\n" + ns
 
