@@ -8,6 +8,7 @@
 | :----: | :----: |
 | **nb-get-help** | if installed correctly, a list of available commands |
 | ... | ... |
+| **nb-git-clone-pnbp-blog** | command to clone from github to a new blog/ |
 | nb-commit-remote | post #public to nb.API_BASE |
 | nb-commit-local | post #public to localhost:8000 regardless nb.API_BASE |
 | nb-commit-html | save the nb->html conversion to nb.HTML_PATH (local debug) |
@@ -73,6 +74,24 @@ tl;dr :
 		- ... **'all tags'** to show up in this: ```nb.get_tagged('#mytag')```
 		- ... **'all notes'** in this: ```nb.get_linked('SCIENCE')```
 
+```collect-all-moc```
+- MOCs (*"Maps of Content"* ) ~= notes that mostly contain reference links to other notes (i.e. the *"content"* itself).
+- By default, any note with an n.name that is "**ENTIRELY UPPERCASE**" is considered to be an MOC here. 
+-> personalize w/ **pnbp\_config.json** (default values shown here) :
+	- ```"MOC_TAG": "#moc"``` -> explicit **\#tag** to *include* note to MOCs
+	- ```"CONT_TAG": "#cont"``` -> explicit **\#tag** to *exclude* as MOC
+
+```json
+	...
+	"MOC_TAG": "#map",
+	"CONT_TAG": "#nam",
+	...
+```
+
+... 
+	- ... e.g. **nb/HOME.md** would be an MOC, **nb/home.md** wouldn't be; 
+	- ... if note **'HOME'** was tagged with **\#cont**, it *wouldn't* be considered an MOC
+	- ... if note **'home'** was tagged with **\#moc**, it *would* be considered an MOC
 
 ---
 
@@ -145,7 +164,7 @@ generating flat relationship graphs to .md using **mermaid js** :
 - -> **nb/code/n.name.ext**
 
 ```
-% nb-extract-code-blocks -n SCIENCE --lang=py
+% nb-extract-code-blocks -n SCIENCE -l py
 % cd notebook/code
 % python SCIENCE.py
 Hello World!
@@ -209,40 +228,135 @@ see [pnano](https://github.com/prettynb/pnano) for more details.
 
 --- 
 
---- 
+___ 
 
-**\*\*** these files are explicitly *not* **\#pnbp**:  
-- **user generated *w/* pnbp commands**  : 
-	- **graph.py** 's ```nb-create-link-graph```,  ```nb-create-tag-graph```, 
-	- **tasks.py** used ```nb/_complete.md``` file,  
-	- anything **code.py** extracted via```nb-extract-code-blocks``` or ```nb-extract-all-code-blocks``` to ```nb.NOTE_PATH/code/``` files.
-- ...  
-
-this ensure that :
-- ```nb-delete-all-pnbp``` doesn't remove things you likely want to keep. 
-- ```nb-collect-all-graphs``` (-> **nb/all graphs.md**) gives \[\[links\]\].
-- ... 
+### register new commands :
 
 --- 
 
---- 
+##### **intro** :
+- -> ```nb-do-this-thing``` will be the resulting command (when registered).
+- ```@pass_nb``` provides an instance of **Notebook**, if one isn't being provided.  
+- w/ ```def _func_name(nb=None):``` (decorator + leading underscore +  default) tells you that the function will be registered as a **command** ( in ../cli.py ). 
+- meaning, ```def func_name():``` here (as a general pattern) aren't.
+- (note : using ```def _nb_do_this_thing(...``` will result in the same ```nb-do-this-thing``` command name. ) 
 
-(HOW TO) : **Register functions from your own commands/mymodule.py  to ** **../cli.py** :
+```py
+# commands/new.py
+from pnbp.wrappers import pass_nb
 
-nb.generate_note(..., **pnbp=True**)
-- ```pnbp=True```** ensures that: 
+
+def some_portion(nb):
+	pass
+
+@pass_nb
+def _do_this_thing(nb=None):
+	# ...
+	some_portion(nb)
+	# ...
+```
+
+...  
+
+
+##### **accepting a note by name** :
+- -> ```nb-parse-these-thing -n SCIENCE```
+
+```py
+# commands/new.py
+from pnbp.wrappers import pass_nb
+from pnbp.models import Note
+
+@pass_nb
+def _parse_these_thing(note: Note, nb=None):
+	pass
+```
+
+...  
+
+##### **accept your own click options** :
+-> ```nb-search-for -s "blah blah"```
+
+```py
+# commands/new.py
+import click
+from pnbp.wrappers import pass_nb
+
+@pass_nb
+@click.option('-s', '--search-str', help="a string to search for in the notebook.")
+def _search_for(search_str=search_str, nb=None):
+	ns = []
+	for n in nb.notes.values():
+		if search_str in n.md:
+			ns.append(n)
+
+	print(f"{search_str} found in {len(ns)} notes :")
+	for n in ns:
+		print(f"- {n.name}")
+```
+
+... 
+
+##### nb.generate_note(..., **pnbp=True**)
+- on ```pnbp=True```, the note.md is tagged **\#pnbp** (at the bottom).
+- **ensuring that** : 
 	- (a) no litter is left behind when calling ```nb-delete-all-pnbp```.
 	- (b) it's **nb/all stats.md** collected.
 	- (c) it's not littering your own (or anybody else's) matches when using e.g. :  ```n.is_tagged(...), n.is_linked(...)```, ```nb.get_tagged(...), nb.get_linked(...)```.
 	- (d) ^^ it's not littering other **\#pnbp** (e.g. ... 
 - every (currently) generated via ```nb-collect-all``` and ```nb-collect-unlinked-mentions```
+- **user generated *w/* pnbp commands** are explicitly *not* **\#pnbp** : 
+	- **graph.py** 's ```nb-create-link-graph```,  ```nb-create-tag-graph```, 
+	- **tasks.py** used ```nb/_complete.md``` file,  
+	- anything **code.py** extracted via```nb-extract-code-blocks``` or ```nb-extract-all-code-blocks``` to ```nb.NOTE_PATH/code/``` files.
+- **ensuring that** :
+	- ```nb-delete-all-pnbp``` doesn't remove things you likely want to keep. 
+	- ```nb-collect-all-graphs``` (-> **nb/all graphs.md**) gives \[\[links\]\].
+	- ... 
 
 ```py
-nb.generate_note(name='new thing', md_out='...', overwrite=True, pnbp=True)
+@pass_nb
+def _collect_something_new(nb=None):
+	# ...
+	nb.generate_note(name='new thing', md_out='...', overwrite=True, pnbp=True)
 ```
+
 
 --- 
 
+#### -> **../cli.py**
 
 
+1. import your module from the commands package (at the top) :
 
+```py
+# ...
+from commands import new
+# ...
+```
+
+2. find and append to the ```create_all_commands()``` function : 
+
+```py
+# ... 
+def create_all_commands():
+	# ... 
+	# add individually : 
+	create_command(new._collect_something_new)
+	# or by module :
+	create_commands(new, _all=True) # _func -> nb-func 
+# ... 
+```
+
+3. navigate to ```pnbp/``` and run ```pip install --editable .``` again : 
+
+```py
+(venv) % cd pnbp
+(venv) % pip install --editable .
+# ... 
+(venv) % nb-get-help
+# -> see your new command in the list !
+(venv) % nb-do-that-thing
+```
+
+--- 

@@ -9,16 +9,19 @@ a pretty **note** is a single .md file within the notebook directory.
 
 https://obsidian.md/ is the best example of this in action. 
 
-**pnbp** provides programmatic access to a notebook via :
-- **[pnbp/pnbp](https://github.com/prettynb/pnbp/tree/master/pnbp)** : contains models and methods. access your notes and update them live from the python repl, in scripts, or your own commands (easily). 
-- **[pnbp/commands](https://github.com/prettynb/pnbp/tree/master/commands)** : contains shell commands. work with the notebook using packaged commands directly in the terminal, or, schedule them.
+--- 
 
+**pnbp** provides programmatic access to a **notebook** via :
+- **[> pnbp/pnbp](https://github.com/prettynb/pnbp/tree/master/pnbp)** : **models and methods**. 
+    - access notes and their individual (regex established) components in the python repl, scripts, and your own shell commands. 
+- **[> pnbp/commands](https://github.com/prettynb/pnbp/tree/master/commands)** : **shell commands**. 
+    - run pre-defined function against a notebook in the terminal directly, or, scheduled.
 
 --- 
 
-**installation** : 
-
 (1)
+
+**git clone** the repo. 
 
 ```bash
 git clone https://github.com/prettynb/pnbp/ pnbp
@@ -27,28 +30,38 @@ pip install -r requirements.txt
 pip install --editable .
 ```
 
+--- 
+
 (2)
 
-set **NOTE_PATH**, as an environment variable,  to the full directory path of your notebook
+set **environment variables**.
 
-(e.g. macos/linux appending your sh profile: ```echo 'export NOTE_PATH="/users/alice/notebook"' >> ~/.zshrc```
+| var | desc | e.g. |
+| :--: | :--: | :--: |
+| **NOTE_PATH** | the full directory path of your notebook | ```echo 'export NOTE_PATH="/users/alice/notebook"' >> ~/.zshrc``` |
+| **IMG_PATH** | (optional entirely; set here or in pnbp_conf.json) | ```echo 'export IMG_PATH="$NOTE_PATH/imgs"' >> ~/.zshrc``` | 
+| **HTML_PATH** | (optional entirely; useful debug w/ pnbp-blog; set here, in pnbp_conf.json, or not at all.) | ```echo 'export HTML_PATH="$NOTE_PATH/html"' >> ~/.zshrc``` | 
+| **NOTE_NESTED** | (optional; default=*"flat"*) => *"single"*, *"recurs"*, *"all"*,  | ... |
+| **NOTE_CONFIG** | (optional) => **"off"** to ignore using a NOTE_PATH/pnbp_conf.json  | ```echo 'export NOTE_CONFIG="off"' >> ~/.zshrc``` |
 
-or see more for **Windows** below).
+( ... on **Windows**? Environment Variable(s) can be set [here](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html#GUID-DD6F9982-60D5-48F6-8270-A27EC53807D0). Also, recall that in most places you'll also need to escape the "```\```" within any **path** strings (e.g. ```"IMG_PATH": "\\Users\\alice\\notebook\\imgs"```) used; the drive letter (e.g. ```"D:\\Media\imgs"```) is optional if it's your **\%HOMEDRIVE\%**. )
+
+
+**NOTE_NESTED** - 
+- *"flat"* - by default, **pnbp** assumes that every .md note exist within the base directory level of **NOTE\_PATH**/.
+- *"single"* - if you want **pnbp** to search for .md notes within additional (non-hidden) directory level up.
+- *"recurs"* - if you want .md notes to be found through all (non-hidden) directory levels up.
+- *"all"* - if you want even hidden (non- .git, .obsidian) directories traversed recursively up.
+
+**NOTE_CONFIG** - 
+- without ```NOTE_CONFIG="off"```, "**NOTE\_PATH/pnbp_conf.json**" will be nagged for.
+- **Notebook** can generate one at the python prompt that you can edit later -> 
+
+--- 
 
 (3)
 
-set **NOTE_CONFIG** to "off" (e.g. ```echo 'export NOTE_CONFIG="off"' >> ~/.zshrc```) if you want to stop here and ignore the rest.
-
-**IMG_PATH** and **HTML_PATH** can also optionally be understood as environment variables, e.g. 
-
-```sh
-echo 'export IMG_PATH="$NOTE_PATH/imgs"' >> ~/.zshrc
-echo 'export HTML_PATH="$NOTE_PATH/blogtest"' >> ~/.zshrc
-```
-
-or set later.
-
-If you don't use ```NOTE_CONFIG="off"```, when you open the notebook in python for the first time, you'll be prompted to a default **NOTE_PATH/pnbp_conf.json** generated that you can edit later on :
+**access your notes in python !** 
 
 ```py
 >>> import pnbp
@@ -56,28 +69,9 @@ If you don't use ```NOTE_CONFIG="off"```, when you open the notebook in python f
 ... 
 ```
 
-see **conf_template.json** (and [pnbp-blog](https://github.com/prettynb/pnbp-blog)'s README as most is associated).
-
-Have fun.
-
 --- 
 
-**Windows** : 
 
-\*\* When you set a file path, ensure that each "\\" is escaped  
-(drive letter is only necessary if the directory isn't on your %HOMEDRIVE%):
-
-```json
-    ...
-    "NOTE_PATH": "C:\\Users\\alice\\notebook",
-    "IMG_PATH": "\\Users\\alice\\notebook\\imgs",
-    ...
-```
-
-and here is an [oracle docs](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html) guide on Environment Variables. 
-
-
---- 
 
 
 
