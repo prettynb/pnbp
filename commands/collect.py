@@ -15,7 +15,6 @@ from .tasks import _collect_tasks_note
 from .graph import _collect_public_graph, _collect_all_graphs
 from .subl import _collect_subl_projs
 from .commit import _collect_git_diff
-from .cleanup import _collect_nonexistant_links
 
 
 """ commands writing collections to specific notebook files:
@@ -36,17 +35,6 @@ def _collect_all_stats(nb=None):
 	cont += "\n".join(pnbp_generated)
 
 	nb.generate_note('all stats', cont, overwrite=True, pnbp=True)
-
-
-@pass_nb
-def _delete_all_pnbp(nb=None):
-	""" if note contains #pnbp -> DELETE
-	"""
-	for n in nb.get_tagged("#pnbp"):
-		lfn = n.name + '.md'
-		if os.path.exists(os.path.join(nb.NOTE_PATH, lfn)):
-			print(f'removing: {lfn} (#pnbp)')
-			os.remove(os.path.join(nb.NOTE_PATH, lfn))
 
 
 @pass_nb
@@ -221,6 +209,28 @@ def _collect_all_tags(nb=None):
 		)
 
 
+@pass_nb
+def _collect_nonexistant_links(nb=None):
+	""" ... -> nb/all nonexistant links.mb
+	"""
+	ns = "\n\n---\n\n"
+
+	for n in nb.notes.values():
+		_oldl = []
+		for name in n.links:
+			if not nb.get(name):
+				print(f'\[\[{name}\]\]')
+				_oldl.append(f'\[\[{name}\]\]')
+
+		if _oldl:
+			print(f'\n[[{n.name}]] :\n --> ')
+			ns += f'\n[[{n.name}]] :\n --> '
+			for ol in _oldl:
+				ns += f'{ol}, '
+			ns += '\n'
+
+	nb.generate_note('all nonexistant links', ns, overwrite=True, pnbp=True)
+
 
 
 
@@ -237,7 +247,8 @@ def _nb_collect_all(nb=None):
 
 
 
-
+"""
+"""
 
 
 

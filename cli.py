@@ -8,14 +8,14 @@ import click
 from pnbp.models import Notebook
 from pnbp.wrappers import arrow_call
 
-from commands import cleanup as clea
+from commands import correct as corr
 from commands import commit as comm
 from commands import collect as coll
-from commands import tasks
-from commands import subl
-from commands import graph
 from commands import code
+from commands import graph
 from commands import pprint
+from commands import subl
+from commands import tasks
 
 
 
@@ -188,20 +188,18 @@ def create_all_commands():
 
 	create_commands(coll, _all=True)
 
-	create_command(tasks._nb_task_settle)
+	create_commands(corr, _all=True)
+
+	# create_command(corr._strip_links_spacing)
+	# create_command(corr._expand_links_spacing)
+	# create_command(corr._remove_leading_newline)
+	# create_command(corr._prepend_leading_newline)
+	# create_command(corr._link_unlinked_mentions)
+	# create_command(corr._remove_nonexistant_links)
+	# create_command(corr._collect_unlinked_mentions)
 
 	create_command(comm._git_commit_notebook)
 	create_command(comm._init_git_ignore)
-
-	create_command(clea._strip_links_spacing)
-	create_command(clea._expand_links_spacing)
-	create_command(clea._remove_leading_newline)
-	create_command(clea._add_leading_newline)
-	create_command(clea._link_unlinked_mentions)
-	create_command(clea._remove_nonexistant_links)
-	create_command(clea._collect_unlinked_mentions)
-
-	create_command(subl._subl_init)
 
 	create_command(graph._create_link_graph)
 	create_command(graph._create_tag_graph)
@@ -210,7 +208,11 @@ def create_all_commands():
 	create_command(code._extract_code_blocks)
 	create_command(code._extract_all_code_blocks)
 
+	create_command(tasks._nb_task_settle)
+
 	create_command(pprint._nb_pprint)
+
+	create_command(subl._subl_init)
 
 
 

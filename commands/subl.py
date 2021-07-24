@@ -8,6 +8,8 @@ from pnbp.wrappers import pass_nb
 
 
 
+""" w/ symlink to NOTE_PATH
+"""
 @click.option('--path', default='.', help='File path to new project')
 @pass_nb
 def _subl_init(path, nb=None):
@@ -46,6 +48,8 @@ def _subl_init(path, nb=None):
 
 
 
+""" ... 
+"""
 @pass_nb
 def _collect_subl_projs(nb=None):
 	""" nb/example.sublime_project -> sublime-project.md

@@ -1,9 +1,9 @@
 from string import ascii_uppercase
 
+import click 
+
 from pnbp.models import Notebook, Note
 from pnbp.wrappers import pass_nb
-
-import click 
 
 """ -> graph 
 	e.g. 

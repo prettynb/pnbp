@@ -3,6 +3,7 @@ import datetime
 
 from pnbp.models import Notebook, Note
 from pnbp.wrappers import pass_nb
+
 """
 	- #todo a task to record _complete and perm remove w/ #complete
 	- doesn't require todo tag to #complete
@@ -24,6 +25,8 @@ TASK_INCOMPLETE = r'(^|\s)(-\s\[\s\]\s)(.*)'
 TASK_COMPLETE = r'(^|\s)(-\s\[x\]\s)(.*)'
 
 TASK_VARS = r'\((.+:+.+)\)'
+
+
 
 """
 """
