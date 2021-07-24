@@ -27,11 +27,12 @@ each note exposes lists of **Link**s, **Tag**s, **CodeBlock**s, **Url**s, (and m
 >>> n.tags #-> list, the #tags found (outside of any code, url, or \#escaped)
 >>> n.urls #-> list, the http(s) external links 
 >>> n.codeblocks #->list, any blocks of code via triple-backtick 
->>> n.mtime #->str the file's modification date 
->>> 
+>>> # -> e.g. 
 >>> n.slugname #->str n.name=Example Note => n.slugname=example-note
 >>> n.sections #->list the n.md str split at "---"
 >>> n.header # -> bool, via looking for "Links: ..."
+>>> n.mtime #->str the file's modification date 
+>>> # ... 
 ```
 
  the **notebook** instance can provide collections of things: 
@@ -58,10 +59,10 @@ and **note**(s) can be individually queried against things:
 ```
 
 --- 
-**update the contents of a note...** 
+#### **update the contents of a note... ** 
 
 
-manually :
+##### **manually** :
 
 ```py
 >>> import pnbp
@@ -84,7 +85,8 @@ manually :
 >>> n.md # n here is older than what's in the nb !
 ```
 
-search and destroy :
+
+##### **search and destroy** :
 
 ```py
 >>> nb.find(r'~!') #->n list, search notebook for regex 
@@ -93,7 +95,8 @@ search and destroy :
 >>> nb.find_and_replace("appending an example line!!", "")
 ```
 
-prime content protected :
+
+##### **prime content protected** : 
 
 ```py
 >>> import re
@@ -105,12 +108,13 @@ prime content protected :
 >>> # by being replaced with a string key e.g. l_01.
 >>> n.md_out = re.sub(r'example', 'e.x.', n.md_out) # ... 
 >>> n.prime_md_out_release() # l_01. -> [[example note]]
+>>> # enure unharmed! -> 
 >>> n.save(nb)
 >>> # or
 >>> n.prime_md_out_release(nb) # inplace save
 ```
 
-by section :
+##### **by section** :
 
 ```py
 >>> n = nb.get("SCIENCE")
@@ -126,7 +130,11 @@ by section :
 >>> # and saved inplace
 ```
 
-generate a new note :
+^^ set **NOTE_HEADER** as an additional environment variable to define your own personal regex pattern (and overwrite the default: ```r"^Links"```). (e.g. ```export NOTE_HEADER="^Links: \[\[.+"``` would search for the same style header, but be ensuring that at least a single \[\[link\]\] is defined).
+
+--- 
+
+##### **generate a new note** :
 
 ```py
 >>> nb.generate_note(name='examp note 2', md_out='more *great* content here...')
@@ -139,7 +147,9 @@ more *great* content here...
 
 --- 
 
-**Link**, **Tag**, **CodeBlock**, and **Url** all subclass pnbp.helpers.**Helper**. 
+### pnbp.helpers
+
+**Link**, **Tag**, **CodeBlock**, and **Url** all subclass [helpers/base.**Helper**](https://github.com/prettynb/pnbp/blob/master/pnbp/helpers/base.py).
 
 A **Helper** subclass produces a namedtuple object of it's own class name, with a single named instance variable of it's own class name (e.g. ```Link(link="SCIENCE")```, ```Tag(tag="#tag")```, ... ). 
 

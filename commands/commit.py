@@ -27,6 +27,7 @@ def _git_commit_notebook(nb=None):
 	print(subprocess.run(['git', '-C', nb.NOTE_PATH, 'commit', '-m' , f'Automated commit @ {lt} on {ld}'], capture_output=True))
 
 
+
 @pass_nb
 def _collect_git_diff(nb=None):
 	""" git diff -> nb/all diff.md

@@ -8,9 +8,9 @@ import click
 from pnbp.models import Notebook
 from pnbp.wrappers import arrow_call
 
-from commands import correct as corr
-from commands import commit as comm
 from commands import collect as coll
+from commands import commit as comm
+from commands import correct as corr
 from commands import code
 from commands import graph
 from commands import pprint
@@ -179,40 +179,34 @@ def create_commands(module, _all=False):
 def create_all_commands():
 	""" main function for building imported module commands 
 		and tacking them onto the click.group(), & module local() name cli
-	"""
-	# looking into imports from commands/collect.py
-	# for k,v in coll.__dict__.items(): 
-	# 	if inspect.isfunction(v) and k.startswith('_'):
-	# 		# print(k) # _func's name...
-	# 		create_command(v)
 
+	"""
 	create_commands(coll, _all=True)
+
+	create_commands(comm, _all=True)
 
 	create_commands(corr, _all=True)
 
-	# create_command(corr._strip_links_spacing)
-	# create_command(corr._expand_links_spacing)
-	# create_command(corr._remove_leading_newline)
-	# create_command(corr._prepend_leading_newline)
-	# create_command(corr._link_unlinked_mentions)
-	# create_command(corr._remove_nonexistant_links)
-	# create_command(corr._collect_unlinked_mentions)
 
-	create_command(comm._git_commit_notebook)
-	create_command(comm._init_git_ignore)
+	create_command(code._extract_code_blocks)
+	create_command(code._extract_all_code_blocks)
 
 	create_command(graph._create_link_graph)
 	create_command(graph._create_tag_graph)
 	create_command(graph._delete_all_graph_dash_name)
 
-	create_command(code._extract_code_blocks)
-	create_command(code._extract_all_code_blocks)
-
-	create_command(tasks._nb_task_settle)
-
 	create_command(pprint._nb_pprint)
 
 	create_command(subl._subl_init)
+
+	create_command(tasks._nb_task_settle)
+
+
+
+	
+
+
+
 
 
 

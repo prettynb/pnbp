@@ -2,32 +2,60 @@
 
 --- 
 
-**core commands** : 
+**core** : 
 
 | cmd | desc |
 | :----: | :----: |
 | **nb-get-help** | if installed correctly, a list of available commands |
+| **nb-collect-all** | |
+| **nb-delete-all-pnbp** | if note contains #pnbp -> DELETE |
 | ... | ... |
+| nb-collect-unlinked-mentions | ... -> nb/all unlinked mentions.md |
+| nb-delete-all-graph-dash-name | ... |
+
+--- 
+
+**correct** : 
+
+| cmd | desc |
+| :----: | :----: |
+| nb-delete-all-empty | delete all empty notes from nb/all empty.md |
+| ... | ... |
+| nb-prepend-leading-newline | add '\n' if not to top note |
+| nb-remove-leading-newline | remove '\n' if exists from top note |
+| nb-remove-leading-and-trailing-newlines | ... | 
+| ... | ... |
+| nbn-strip-links-spacing | \[\[ LINK \]\] -> \[\[LINK\]\]  |
+| nbn-expand-links-spacing | \[\[LINK\]\] -> \[\[ LINK \]\]  |
+| ... | ... |
+| **nbn-link-unlinked-mentions** | here is my favorite note -> here is my \[\[favorite note\]\] |
+| **nbn-remove-nonexistant-links** | \[\[An Old Note\]\] link -> An Old Note link |
+
+--- 
+
+**commit** :
+
+| cmd | desc |
+| :----: | :----: |
+| **nb-git-commit-notebook** | commit to local git |
+| nb-collect-git-diff | git diff -> nb/all diff.md |
+
+--- 
+
+**-> pnbp-blog** :
+
+| cmd | desc |
+| :----: | :----: |
 | **nb-git-clone-pnbp-blog** | command to clone from github to a new blog/ |
 | nb-commit-remote | post #public to nb.API_BASE |
 | nb-commit-local | post #public to localhost:8000 regardless nb.API_BASE |
 | nb-commit-html | save the nb->html conversion to nb.HTML_PATH (local debug) |
 | nb-commit-stage | *only* print nb-commit- changes against nb.API_BASE (staging view) |
-
-| cmd | desc |
-| :----: | :----: |
-| **nb-git-commit-notebook** | commit to local git |
-
-| cmd | desc |
-| :----: | :----: |
-| nb-add-leading-newline | add '\n' if not to top note |
-| nb-remove-leading-newline | remove '\n' if exists from top note |
-| nb-fix-link-spacing | \[\[ LINK \]\] -> \[\[LINK\]\]  |
-| nb-link-unlinked-mentions | here is my favorite note -> here is my \[\[favorite note\]\] |
+| nb-touch-all-public | update the mod date for all #public (remote debug) |
 
 --- 
 
-**more commands** : 
+#### **more commands** : 
 
 --- 
 
@@ -53,15 +81,8 @@
 | nb-collect-public-graph | \#public -> flat link graph...  |
 | nb-collect-git-diff | git diff -> nb/all diff.md |
 | nb-collect-nonexistant-links | ... -> nb/all nonexistant links.md |
-| ... | more + cleanup.py : |
-| **nb-remove-nonexistant-links** | \[\[An Old Note\]\] link -> An Old Note link |
-| **nb-delete-all-empty** | delete all empty notes from nb/all empty.md |
-| **nb-touch-all-public** | update the mod date for all #public |
-| **nb-collect-unlinked-mentions** | ... -> nb/all unlinked mentions.md |
-| **nb-link-unlinked-mentions** | ...this is my favorite note -> this is \[\[my.. |
-| **nb-delete-all-pnbp** | if note contains #pnbp -> DELETE |
 
-tl;dr :
+... :
 - ```nb-collect-all``` is a main command to call **that generates** a series of .md files to the **nb.NOTE_PATH**
 - **nb/all stats.md** is one that \[\[links\]\] to all **\#pnbp** tag mentions.
 - ```nb-delete-all-pnbp``` **will delete** every **\#pnbp** tagged .md file.
@@ -77,6 +98,10 @@ tl;dr :
 ```collect-all-moc```
 - MOCs (*"Maps of Content"* ) ~= notes that mostly contain reference links to other notes (i.e. the *"content"* itself).
 - By default, any note with an n.name that is "**ENTIRELY UPPERCASE**" is considered to be an MOC here. 
+	- e.g. (default) **nb/HOME.md** would be an MOC, **nb/home.md** wouldn't be; 
+	- ... if note **'HOME'** was tagged with **\#cont**, it *wouldn't* be considered an MOC
+	- ... if note **'home'** was tagged with **\#moc**, it *would* be considered an MOC
+
 -> personalize w/ **pnbp\_config.json** (default values shown here) :
 	- ```"MOC_TAG": "#moc"``` -> explicit **\#tag** to *include* note to MOCs
 	- ```"CONT_TAG": "#cont"``` -> explicit **\#tag** to *exclude* as MOC
@@ -88,10 +113,7 @@ tl;dr :
 	...
 ```
 
-... 
-	- ... e.g. **nb/HOME.md** would be an MOC, **nb/home.md** wouldn't be; 
-	- ... if note **'HOME'** was tagged with **\#cont**, it *wouldn't* be considered an MOC
-	- ... if note **'home'** was tagged with **\#moc**, it *would* be considered an MOC
+
 
 ---
 
@@ -134,12 +156,12 @@ e.g. **note**(s) tagged **\#tasks** :
 
 | cmd | desc |
 | :----: | :----: |
-| **nb-create-link-graph** | --note	-> nb/graph-{note}.md | 
+| **nbn-create-link-graph** | -> nb/graph-{note}.md | 
 | **nb-create-tag-graph** | --tag -> nb/graph-tag-{tag}.md |
 
-generating flat relationship graphs to .md using **mermaid js** : 
+generating flat relationship graphs to .md using **[mermaid js](https://mermaid-js.github.io/mermaid/#/)** : 
 
-```nb-create-link-graph -n SCIENCE```
+```nbn-create-link-graph -n SCIENCE```
 - e.g. includes (and relates) every note **\[\[linked\]\]** within **nb/SCIENCE.md**, as well as every note that *backlinks* to **\[\[SCIENCE\]\]** (i.e. ```n.is_linked("SCIENCE")==True```);
 - producing an **\`\`\`mermaid \`\`\`** graph to **nb/graph-SCIENCE.md**. 
 
@@ -147,24 +169,25 @@ generating flat relationship graphs to .md using **mermaid js** :
 - e.g. includes every note tagged **\#mytag** (i.e. ```n.is_tagged("#mytag")==True```) and relates among them; 
 - producing an \`\`\`mermaid \`\`\` graph to **nb/graph-tag-mytag.md**.
 
+
 --- 
 
 **code.py**
 
 | cmd | desc |
 | :----: | :----: |
-| **nb-extract-code-blocks** | --note, --lang -> nb.NOTE_PATH/code/ | 
-| **nb-extract-all-code-blocks** | --note -> nb.NOTE_PATH/code/ | 
+| **nbn-extract-code-blocks** | --lang -> nb.NOTE_PATH/code/ | 
+| **nbn-extract-all-code-blocks** | -> nb.NOTE_PATH/code/ (per lang found) | 
 
-```nb-extract-code-blocks --note="examp note" --lang=py```
+```nbn-extract-code-blocks --note="examp note" --lang=py```
 - e.g. for each **\`\`\`py \`\`\`** (in ```n.codeblocks```) -> **nb/code/examp note.py**
 
-```nb-extract-all-codeblocks -n SCIENCE```
+```nbn-extract-all-codeblocks -n SCIENCE```
 - e.g. for every valid commands.code.**LANG_EXTS** found (in ```n.codeblocks```) 
 - -> **nb/code/n.name.ext**
 
 ```
-% nb-extract-code-blocks -n SCIENCE -l py
+% nbn-extract-code-blocks -n SCIENCE -l py
 % cd notebook/code
 % python SCIENCE.py
 Hello World!
@@ -219,9 +242,9 @@ Command to initiate a templated **.gitignore** file to the current working dir.
 
 | cmd | desc |
 | :----: | :----: |
-| **nb-pprint** | --note -> ... | 
+| **nbn-pprint** |  ... | 
 
-```nb-pprint -n SCIENCE```
+```nbn-pprint -n SCIENCE```
 - e.g. rich print note to terminal ( ... )
 
 see [pnano](https://github.com/prettynb/pnano) for more details.
@@ -284,7 +307,7 @@ from pnbp.wrappers import pass_nb
 
 @pass_nb
 @click.option('-s', '--search-str', help="a string to search for in the notebook.")
-def _search_for(search_str=search_str, nb=None):
+def _search_for(search_str: str, nb=None):
 	ns = []
 	for n in nb.notes.values():
 		if search_str in n.md:
@@ -297,7 +320,8 @@ def _search_for(search_str=search_str, nb=None):
 
 ... 
 
-##### nb.generate_note(..., **pnbp=True**)
+##### pnbp=True -> 
+nb.generate_note(..., **pnbp=True**)
 - on ```pnbp=True```, the note.md is tagged **\#pnbp** (at the bottom).
 - **ensuring that** : 
 	- (a) no litter is left behind when calling ```nb-delete-all-pnbp```.
@@ -324,7 +348,7 @@ def _collect_something_new(nb=None):
 
 --- 
 
-#### -> **../cli.py**
+#### -> **[../cli.py](https://github.com/prettynb/pnbp/blob/master/cli.py)**
 
 
 1. import your module from the commands package (at the top) :
@@ -342,7 +366,7 @@ from commands import new
 def create_all_commands():
 	# ... 
 	# add individually : 
-	create_command(new._collect_something_new)
+	create_command(new._collect_something_new) # -> nb-collect-something-new
 	# or by module :
 	create_commands(new, _all=True) # _func -> nb-func 
 # ... 
@@ -356,7 +380,7 @@ def create_all_commands():
 # ... 
 (venv) % nb-get-help
 # -> see your new command in the list !
-(venv) % nb-do-that-thing
+(venv) % nb-do-this-thing
 ```
 
 --- 
