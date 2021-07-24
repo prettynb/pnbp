@@ -252,16 +252,34 @@ class Notebook:
 				print(f'found: {m}')
 				notes.append(n)
 
+		print(f'{[n.name for n in notes]}')
+
 		return notes
 
-	def find_and_replace(self, regex, replace):
-		""" be careful, use find first
+	def find_and_replace(self, regex, replace, notes=[]):
+		""" 
+
+		:param regex: 
+		:param replace: 
+		:param notes: 
 		"""
+		msg = "Notebook.find_and_replace requires a list of Notes to make replacements."
+		if not notes:
+			raise ValueError(f"{msg}\nnb.find_and_replace(regex='foo', replace='', notes=nb.find('foo'))")
+		elif not isinstance(notes, list):
+			raise ValueError(f"{msg}\nnb.find_and_replace(..., notes=[nb.get('bar'))]")
+		else:
+			# handle for string name -> note gets
+			pass
+
 		if (ntc := self.find(regex)):
+			ntc = [n for n in ntc if n in notes]
+			print('"replace" <- "regex" : n.name')
 			for n in ntc:
-				n.md_out = re.sub(regex, replace, n.md)
+				n.md_out = re.sub(fr'{regex}', replace, n.md)
 				n.save(self)
-	
+				print(f'"{replace}" <- "{regex}" : {n.name}')
+
 	""" preparing for api commits : 
 	"""
 	@classmethod
@@ -353,7 +371,7 @@ class Notebook:
 
 		nout = Link.add_header_ids(nout)
 
-		nout.md_out = md.markdown(nout.md_out, extensions=['fenced_code',	'nl2br', 'markdown.extensions.tables', 'attr_list', 'footnotes'], use_pygments=True)
+		nout.md_out = md.markdown(nout.md_out, extensions=['fenced_code', 'nl2br', 'markdown.extensions.tables', 'attr_list', 'footnotes'], use_pygments=True)
 
 		nout = CodeBlock.fix_blocked_comments(nout)
 		nout = Notebook.replace_strikethrough(nout)
@@ -370,7 +388,7 @@ class Notebook:
 
 		print(f'\nlocal commit: {self.HTML_PATH}')
 		for n in self.notes.values():
-			# if re.search(self.COMMIT_TAG, n.md):
+
 			if n.is_tagged(self.COMMIT_TAG) and not n.is_tagged(self.EXCLUDE_TAG):
 				nout = self.convert_to_html(note=n)
 				of = open(os.path.join(self.HTML_PATH, f"{n.slugname}.html"), 'w')
@@ -484,7 +502,7 @@ class Notebook:
 		for n in self.notes.values():
 			to_post = False
 			fname = n.slugname + '.html'
-			# if re.search(self.COMMIT_TAG, n.md):
+
 			if n.is_tagged(self.COMMIT_TAG) and not n.is_tagged(self.EXCLUDE_TAG):
 				post_names.append(fname)
 				if fname in pub_pub_names:
@@ -559,11 +577,8 @@ class Notebook:
 				del _config[k]
 
 		r = requests.post(f'{self.API_BASE}/api/layout', json=_config, headers=h)
+
 		print(r)
-		# -> record to file ? 
-		# with open(os.path.join(self.NOTE_PATH, 'pnbp-blog-settings.json'), 'r') as f:
-		# 	r = requests.post(f'{self.API_BASE}/api/layout', json=json.load(f), headers=h)
-		# 	print(r)
 
 	def create_api_user(self, username=''):
 		""" request method to generate an pnbp-blog API user 
@@ -571,15 +586,16 @@ class Notebook:
 		if not username:
 			username = input('username: ')
 
-		password_1 = getpass.getpass()
-		password_2 = getpass.getpass()
-		if not password_1 == password_2:
+		p_1 = getpass.getpass()
+		p_2 = getpass.getpass()
+
+		if not p_1 == p_2:
 			print('passwords do not match...')
 			self.create_api_user(username)
 
 		u = {
 			"username": username,
-			"password_hash": password_1
+			"password_hash": p_1
 			}
 
 		h = self.get_headers()
@@ -592,6 +608,7 @@ class Notebook:
 		"""
 		p_1 = getpass.getpass()
 		p_2 = getpass.getpass()		
+
 		if not p_1 == p_1:
 			print('passwords do not match...')
 			self.reset_api_password()

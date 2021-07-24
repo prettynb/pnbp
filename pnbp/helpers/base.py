@@ -90,10 +90,11 @@ class Helper:
 	def __add__(self, b) -> str:
 		"""
 		"""
-		if isinstance(b, str):
-			return f'{str(self)}{b}'
+		if not isinstance(b, str):
+			# raise TypeError(f"cannot add non-str object to {self.__class__.__name__} instance.")
+			b = str(b)
 
-		return super().__add__(self, b)
+		return f'{str(self)}{b}'
 
 	@staticmethod
 	def prep_md_out(mtd):

@@ -86,7 +86,7 @@ def _collect_all_public(nb=None):
 	""" if note contains #public -> notebook/all public.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_tagged(nb.COMMIT_TAG)])
-	ns = "\n#public posts:\n\n --- \n\n " + ns
+	ns = "\n#public posts:\n\n --- \n\n" + ns
 
 	nb.generate_note('all public', ns, overwrite=True, pnbp=True)
 
@@ -110,7 +110,7 @@ def _collect_terms(nb=None):
 		TERMS_NOTE = 'TERMS'
 
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if n.is_linked(TERMS_NOTE)])
-	ns = f"\nall [[{TERMS_NOTE}]] :\n\n --- \n\n " + ns
+	ns = f"\nall [[{TERMS_NOTE}]] :\n\n --- \n\n" + ns
 
 	nb.generate_note(TERMS_NOTE, ns, overwrite=True, pnbp=True)
 
@@ -121,7 +121,7 @@ def _collect_all_unlinked(nb=None):
 		-> nb/all unlinked.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if not n.links])
-	ns = "\nall unlinked :\n\n --- \n\n " + ns
+	ns = "\nall unlinked :\n\n --- \n\n" + ns
 
 	nb.generate_note('all unlinked', ns, overwrite=True, pnbp=True)
 
@@ -132,7 +132,7 @@ def _collect_all_empty(nb=None):
 		-> nb/all empty.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if len(n.md) < 4])
-	ns = "\nall empty :\n\n --- \n\n " + ns
+	ns = "\nall empty :\n\n --- \n\n" + ns
 
 	nb.generate_note('all empty', ns, overwrite=True, pnbp=True)
 
@@ -156,7 +156,7 @@ def _collect_all_unheadered(nb=None):
 		-> nb/all unheadered.md
 	"""
 	ns = "".join([f"[[{n.name}]]\n" for n in nb.notes.values() if not n.header])
-	ns = "\nall unheadered :\n\n --- \n\n " + ns
+	ns = "\nall unheadered :\n\n --- \n\n" + ns
 
 	nb.generate_note('all unheadered', ns, overwrite=True, pnbp=True)
 

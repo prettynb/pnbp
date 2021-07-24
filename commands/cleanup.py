@@ -1,26 +1,39 @@
 import re
-
 from pnbp.models import Note
 from pnbp.wrappers import pass_nb
 from pnbp.helpers import Link
 
 
-"""
+
+""" 
 """
 @pass_nb
-def _fix_link_spacing(note:Note, nb=None):
+def _strip_links_spacing(note:Note, nb=None):
 	""" [[ LINK ]] -> [[LINK]]
 	"""
 	n = note
 	p = re.compile(Link.MDS_INT_LNK)
 
-	n.md_out = p.sub(Link.str_strip_name, n.md)
+	n.md_out = p.sub(Link.str_strip_link, n.md)
 	n.save(nb)
 
 
 @pass_nb
-def _add_leading_newline(nb=None):
-	""" add '\n' if not to top of note 
+def _expand_links_spacing(note:Note, nb=None):
+	""" [[LINK]] -> [[ LINK ]]
+	"""
+	n = note
+	p = re.compile(Link.MDS_INT_LNK)
+
+	n.md_out = p.sub(Link.str_expand_link, n.md)
+	n.save(nb)
+
+
+"""
+"""
+@pass_nb
+def _prepend_leading_newline(nb=None):
+	""" add (a single) '\n' if not to top of every note 
 	""" 
 	for n in nb.notes.values():
 		if not n.md.startswith('\n'):
@@ -30,12 +43,24 @@ def _add_leading_newline(nb=None):
 
 @pass_nb
 def _remove_leading_newline(nb=None):
-	""" remove leading '\n' if in note
+	""" remove (a single) leading '\n' from every in note
+		(->  it if you want consistant top of file)
 	"""
 	for n in nb.notes.values():
 		if n.md.startswith('\n'):
 			n.md_out = n.md[1:]
 			n.save(nb)
+
+
+@pass_nb
+def _remove_leading_and_trailing_newlines(nb=None):
+	""" str.strip() if necessary
+	"""
+	for n in nb.notes.values():
+		if n.md.startswith('\n') or n.md.endswith('\n'):
+			n.md_out = n.md.strip()
+			n.save(nb)
+
 
 
 

@@ -147,18 +147,23 @@ def _collect_all_graphs(nb=None):
 
 
 
+@pass_nb
+def _delete_all_graph_dash_name(nb=None):
+	"""
+	"""
+	for n in nb.notes.values():
+		if n.name.startswith('graph-') and n.codeblocks[0].lang == 'mermaid':
+			lfn = n.name + '.md'
+			if os.path.exists(os.path.join(nb.NOTE_PATH, lfn)):
+				print(f'removing: {lfn} (graph-)')
+				os.remove(os.path.join(nb.NOTE_PATH, lfn))
 
 
 
-if __name__ == '__main__':
-	pass
-	# nb = Notebook()
-	# _create_tag_graph('jots', nb)
-	# _create_link_graph('TODAY', nb)
-	# _create_link_graph('PYTHON', nb)
 
-	# for n in nb.notes.values():
-	# 	# print(n.name)
-	# 	if n.is_tagged('public'):
-	# 		print(n.name)
-			# _create_link_graph(n.name, nb)	
+
+
+
+
+
+

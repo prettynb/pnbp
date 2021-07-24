@@ -97,9 +97,14 @@ class Link(Helper):
 		return note
 
 	@staticmethod
-	def str_strip_name(matchobj):
+	def str_strip_link(matchobj):
 		""" """
 		return f'[[{matchobj.group(1).strip()}]]'
+
+	@staticmethod
+	def str_expand_link(matchobj):
+		""" """
+		return f'[[ {matchobj.group(1).strip()} ]]'
 
 	@staticmethod
 	def add_link_mention(matchobj):
@@ -111,6 +116,8 @@ class Link(Helper):
 		""" """
 		return matchobj.group(2)
 
+	"""
+	"""
 	@property
 	def aslink(self):
 		""" """
@@ -208,6 +215,14 @@ class Link(Helper):
 			slugname = slugname.split('|')[0].rstrip('-')
 
 		return slugname
+
+	def resolve(self, nb):
+		""" 
+		:param nb: an Notebook instance
+		:returns: an Note instance
+		"""
+		return nb.get(self.note)
+
 
 
 
