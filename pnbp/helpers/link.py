@@ -172,7 +172,7 @@ class Link(Helper):
 		else:
 			fpp = '/'
 
-		if len((bydir := self.link.split(fpp))) > 1:
+		if len((bydir := [x for x in self.link.split(fpp) if x])) > 1:
 			subdirs = bydir[:-1]
 			return subdirs
 

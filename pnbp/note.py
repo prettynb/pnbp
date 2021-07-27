@@ -74,6 +74,13 @@ class Note(namedtuple('Note', ['name', 'md', 'links', 'tags', 'urls', 'codeblock
 		return self.name
 
 	@property
+	def subdirs(self):
+		"""
+		"""
+		_name = Link(self.name)
+		return _name.subdirs
+	
+	@property
 	def slugname(self):
 		""" My Note Name -> my-note-name
 		"""

@@ -60,6 +60,11 @@ class Notebook:
 				self.config = json.load(cf)
 		else:
 			self.config = {} # lazy handle existance for conf_file=False
+		
+		if not os.environ.get('NOTE_NESTED') in ('flat', 'single', 'recurs', 'all'):
+			self.config['NOTE_NESTED'] = 'flat'
+		else:
+			self.config['NOTE_NESTED'] = os.environ.get('NOTE_NESTED')
 
 		if not self.IMG_PATH:
 			# prefering set environment variable
@@ -101,7 +106,7 @@ class Notebook:
 		if isinstance(f, Note):
 			f = f.name + '.md'
 
-		fname = f.split('.')[0]
+		fname = f.split('.')[0].replace(self.NOTE_PATH, '')
 		with open(os.path.join(self.NOTE_PATH, f), 'r') as fo:
 			fo = fo.read()
 
@@ -119,14 +124,61 @@ class Notebook:
 
 		return n
 
+	def open_sub_md(self, subdir, search_hidden: bool)->list:
+		""" helper method to walk through 
+			self.NOTE_PATH subpaths (if necessary)
+
+		:param subdir: a subdirectory
+		:param search_hidden: whether or not to be walking .directories
+		"""
+		if subdir.startswith('.') and not search_hidden:
+			return []
+
+		if subdir in ('.git', '.obsidian', '__pycache__'):
+			return []
+
+		subpath = os.path.join(self.NOTE_PATH, subdir)
+		
+		for f in os.listdir(subpath):
+			if f.endswith('.md'):
+				self.open_note(os.path.join(subpath,f))
+
+		subdirs = [d for d in os.listdir(subpath) if os.path.isdir(os.path.join(subpath, d))]
+		subdirs = [d for d in subdirs if not d in ('.git', '.obsidian', '__pycache__')]
+
+		if search_hidden:
+			return subdirs
+		else:
+			return [d for d in subdirs if not d.startswith('.')]
+
+	def open_sub_md_recurs(self, subdir, search_hidden: bool):
+		""" ... 
+		"""
+		while (r := self.open_sub_md(subdir, search_hidden)):
+			subdir = os.path.join(subdir, r.pop())
+			self.open_sub_md_recurs(subdir, search_hidden)
+
 	def open_md(self)->dict:
 		""" open all .md files from the self.NOTE_PATH path
 			into memory as e.g. {"my note name": Note}
 			-> available at nb.notes
 		"""
+		NOTE_NESTED = self.config.get('NOTE_NESTED')
+		srch_hidden = (True if NOTE_NESTED == 'all' else False)
+
 		for f in os.listdir(self.NOTE_PATH):
 			if f.endswith('.md'):
 				self.open_note(f)
+		
+		if NOTE_NESTED != 'flat':
+			for d in os.listdir(self.NOTE_PATH):
+				if os.path.isdir(os.path.join(self.NOTE_PATH, d)):
+
+					if NOTE_NESTED == 'single':
+						self.open_sub_md(d, srch_hidden)
+					
+					elif NOTE_NESTED == 'recurs':
+						self.open_sub_md_recurs(d, srch_hidden)
 		
 		self.notes = dict(sorted(self.notes.items()))
 
