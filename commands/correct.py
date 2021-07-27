@@ -156,8 +156,6 @@ def _delete_all_pnbp(nb=None):
 def _delete_all_empty(nb=None):
 	""" delete all empty notes from nb/all empty.md
 	"""
-	_collect_all_empty(nb) # refresh
-
 	for l in nb.notes['all empty'].links:
 		lfn = l + '.md'
 		if os.path.exists(os.path.join(nb.NOTE_PATH, lfn)):
