@@ -80,15 +80,6 @@ def _collect_all_public(nb=None):
 
 
 @pass_nb
-def _touch_all_public(nb=None):
-	""" update the mod date for all #public """
-	_collect_all_public(nb)
-
-	for f in nb.notes['all public'].links:
-		subprocess.run(['touch', os.path.join(nb.NOTE_PATH, f+'.md')])
-
-
-@pass_nb
 def _collect_terms(nb=None):
 	""" if found [[TERMS]] -> nb/TERMS.md
 	"""
@@ -123,19 +114,6 @@ def _collect_all_empty(nb=None):
 	ns = "\nall empty :\n\n --- \n\n" + ns
 
 	nb.generate_note('all empty', ns, overwrite=True, pnbp=True)
-
-
-@pass_nb
-def _delete_all_empty(nb=None):
-	""" delete all empty notes from nb/all empty.md
-	"""
-	_collect_all_empty(nb) # refresh
-
-	for l in nb.notes['all empty'].links:
-		lfn = l + '.md'
-		if os.path.exists(os.path.join(nb.NOTE_PATH, lfn)):
-			print(f'removing: {lfn} (empty)')
-			os.remove(os.path.join(nb.NOTE_PATH, lfn))
 
 
 @pass_nb
@@ -247,8 +225,7 @@ def _nb_collect_all(nb=None):
 
 
 
-"""
-"""
+
 
 
 
