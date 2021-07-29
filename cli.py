@@ -34,8 +34,8 @@ def _nb_get_help():
 	# pass into the command when built below
 	loc_p = os.path.dirname(__file__)
 	cli_p = os.path.join(loc_p, 'cli.py')
-	# no need to print as running the file runs the command
-	subprocess.run(['python3', cli_p, '--help'])
+	
+	click.echo(subprocess.run(['python3', cli_p, '--help']))
 
 
 @cli.command()

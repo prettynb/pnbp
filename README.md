@@ -3,9 +3,9 @@ pnbp = **"pretty notebook parser"**
 --- 
 
 **pnbp** provides programmatic access to a **notebook** via :
-- **[> pnbp/pnbp](https://github.com/prettynb/pnbp/tree/master/pnbp)** : **models and methods**. 
+- **[> pnbp/pnbp](https://github.com/prettynb/pnbp/tree/master/pnbp/README.md)** : **models and methods**. 
     - access notes and their individual (regex established) components in the python repl, scripts, and your own shell commands. 
-- **[> pnbp/commands](https://github.com/prettynb/pnbp/tree/master/commands)** : **shell commands**. 
+- **[> pnbp/commands](https://github.com/prettynb/pnbp/tree/master/commands/README.md)** : **shell commands**. 
     - run pre-defined function against a notebook in the terminal directly, or, scheduled.
 
 \--- 
@@ -23,9 +23,14 @@ https://obsidian.md/ is the best example of this in action.
 
 --- 
 
-##### (1) -> **git clone** the repo.
+##### (0) -> ```pip install pnbp```
+
+--- 
+
+##### (-1) -> **git clone** the repo.
 
 ```bash
+pip uninstall pnbp
 git clone https://github.com/prettynb/pnbp/ pnbp
 cd pnbp/
 pip install -r requirements.txt

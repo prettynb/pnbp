@@ -3,6 +3,7 @@ import re
 import json
 import getpass
 import difflib
+import random
 
 import markdown as md
 import requests
@@ -237,6 +238,13 @@ class Notebook:
 			print(f"note: `{name_in}` does not exist in the notebook!")
 
 		return None
+
+	def get_random_note(self):
+		"""
+		:returns: a random note from the notebook
+		"""
+		return self.notes[random.choice([k for k in self.notes.keys()])]
+
 
 	def get_tagged(self, tag)->list:
 		""" 
